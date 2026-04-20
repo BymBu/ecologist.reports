@@ -1,8 +1,8 @@
 const CACHE_NAME = 'ecolog-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/ecologist.reports/',
+  '/ecologist.reports/index.html',
+  '/ecologist.reports/manifest.json'
 ];
 
 // Устанавливаем кэш
