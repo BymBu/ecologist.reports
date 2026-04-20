@@ -1,0 +1,24 @@
+{
+  "name": "Эколог.Отчёты",
+  "short_name": "EcoLog",
+  "description": "Учёт отходов и генерация отчётности для эколога",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2d5a27",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

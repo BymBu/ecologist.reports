@@ -1,0 +1,22 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Логи и временные файлы
+*.log
+*.tmp
+
+# Папки node_modules (если будут в будущем)
+node_modules/
+
+# Сборки (если будут отдельно)
+dist/
+build/
+
+# Среда
+.env
+.env.local
