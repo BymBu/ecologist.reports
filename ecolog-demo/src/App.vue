@@ -1,77 +1,83 @@
 <template>
   <div class="app">
-    <!-- Шапка -->
     <header class="header">
-      <div class="header-content">
-        <h1>🌱 Эколог.Отчёты</h1>
-        <p class="subtitle">Офлайн-учёт и автоматическая генерация отчётности</p>
+      <div class="container">
+        <h1>Эколог.Отчёты</h1>
+        <p class="subtitle">Учёт отходов и автоматическая отчётность</p>
       </div>
     </header>
 
-    <main class="main">
-      <!-- Форма добавления -->
-      <div class="card form-card">
-        <h2>➕ Добавить запись об отходе</h2>
-        <div class="form-grid">
-          <div class="form-field">
-            <label>Наименование отхода *</label>
-            <input v-model="newWaste.waste_type" placeholder="Напр. Лом черных металлов" class="input">
+    <main class="main container">
+      <!-- Карточка предприятия (ДЕМО) -->
+      <section class="section company-card">
+        <div class="company-header" @click="showCompany = !showCompany">
+          <div class="company-title">
+            <span class="company-badge">ДЕМО</span>
+            <h2>🏢 Реквизиты предприятия</h2>
           </div>
-          
-          <div class="form-field">
-            <label>Код по ФККО</label>
-            <input v-model="newWaste.fkko_code" placeholder="4 31 200 01 99 5" class="input">
-          </div>
-          
-          <div class="form-field">
-            <label>Класс опасности</label>
-            <select v-model="newWaste.hazard_class" class="input">
-              <option value="">Выберите</option>
-              <option value="I">I — чрезвычайно опасные</option>
-              <option value="II">II — высоко опасные</option>
-              <option value="III">III — умеренно опасные</option>
-              <option value="IV">IV — мало опасные</option>
-              <option value="V">V — практически неопасные</option>
-            </select>
-          </div>
-          
-          <div class="form-field">
-            <label>Объём, тонн *</label>
-            <input type="number" step="0.001" v-model="newWaste.volume" placeholder="0.000" class="input">
-          </div>
-          
-          <div class="form-field">
-            <label>Дата образования</label>
-            <input type="date" v-model="newWaste.date" class="input">
-          </div>
-          
-          <div class="form-field">
-            <label>Место хранения/передачи</label>
-            <input v-model="newWaste.storage" placeholder="Площадка Ирокинда" class="input">
-          </div>
+          <button class="btn-icon toggle-btn">{{ showCompany ? '▼' : '▶' }}</button>
         </div>
-        
-        <div class="form-actions">
-          <button @click="addWaste" class="btn btn-primary">💾 Сохранить</button>
-          <button @click="resetForm" class="btn btn-secondary">Очистить форму</button>
+        <div v-if="showCompany" class="company-content">
+          <div class="company-grid">
+            <div class="company-field">
+              <label>ИНН</label>
+              <div class="field-value">0323123456</div>
+            </div>
+            <div class="company-field">
+              <label>ОГРН</label>
+              <div class="field-value">1020304050607</div>
+            </div>
+            <div class="company-field">
+              <label>КПП</label>
+              <div class="field-value">032301001</div>
+            </div>
+            <div class="company-field">
+              <label>Краткое наименование</label>
+              <div class="field-value">ООО "Z-gold"</div>
+            </div>
+            <div class="company-field full-width">
+              <label>Полное наименование</label>
+              <div class="field-value">Общество с ограниченной ответственностью "Z-gold"</div>
+            </div>
+            <div class="company-field">
+              <label>ОКПО</label>
+              <div class="field-value">12345678</div>
+            </div>
+            <div class="company-field">
+              <label>ОКТМО</label>
+              <div class="field-value">81623456</div>
+            </div>
+            <div class="company-field full-width">
+              <label>Юридический адрес</label>
+              <div class="field-value">670000, Республика Бурятия, г. Улан-Удэ, ул. Ленина, д. 1</div>
+            </div>
+            <div class="company-field full-width">
+              <label>Объект НВОС</label>
+              <div class="field-value">Ирокинда (золотодобыча), код 03-0123-001234, I категория</div>
+            </div>
+          </div>
+          <button class="edit-company-btn" disabled>✎ Редактировать (в разработке)</button>
         </div>
-      </div>
+      </section>
 
-      <!-- Фильтры -->
-      <div class="card filters-card">
-        <div class="filters-row">
-          <div class="filter-group">
-            <label>Фильтр по году:</label>
-            <select v-model="filterYear" class="input-small">
-              <option :value="null">Все годы</option>
-              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
-            </select>
+      <!-- Форма добавления -->
+      <section class="section">
+        <div class="section-header">
+          <h2>Новая запись</h2>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Наименование отхода</label>
+            <input v-model="newWaste.waste_type" type="text" placeholder="Например: Лом черных металлов" />
           </div>
-          
-          <div class="filter-group">
-            <label>Класс опасности:</label>
-            <select v-model="filterClass" class="input-small">
-              <option :value="null">Все классы</option>
+          <div class="field">
+            <label>Код ФККО</label>
+            <input v-model="newWaste.fkko_code" type="text" placeholder="4 31 200 01 99 5" />
+          </div>
+          <div class="field">
+            <label>Класс опасности</label>
+            <select v-model="newWaste.hazard_class">
+              <option value="">—</option>
               <option value="I">I</option>
               <option value="II">II</option>
               <option value="III">III</option>
@@ -79,35 +85,65 @@
               <option value="V">V</option>
             </select>
           </div>
-          
-          <div class="stats">
-            Всего: <strong>{{ filteredWastes.length }}</strong> записей,
-            объём: <strong>{{ totalVolume.toFixed(3) }}</strong> тонн
+          <div class="field">
+            <label>Объём, тонн</label>
+            <input v-model="newWaste.volume" type="number" step="0.001" placeholder="0.000" />
+          </div>
+          <div class="field">
+            <label>Дата</label>
+            <input v-model="newWaste.date" type="date" />
+          </div>
+          <div class="field">
+            <label>Место хранения</label>
+            <input v-model="newWaste.storage" type="text" placeholder="Площадка Ирокинда" />
           </div>
         </div>
-      </div>
+        <div class="form-actions">
+          <button @click="addWaste" class="btn-primary">Сохранить</button>
+          <button @click="resetForm" class="btn-secondary">Очистить</button>
+        </div>
+      </section>
 
-      <!-- Таблица данных -->
-      <div class="card table-card">
-        <div class="table-header">
-          <h2>📋 Данные об отходах</h2>
-          <button v-if="wastes.length" @click="clearAll" class="btn btn-danger">🗑 Очистить всё</button>
+      <!-- Фильтры -->
+      <section class="section">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label>Год</label>
+            <select v-model="filterYear">
+              <option :value="null">Все</option>
+              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Класс</label>
+            <select v-model="filterClass">
+              <option :value="null">Все</option>
+              <option value="I">I</option>
+              <option value="II">II</option>
+              <option value="III">III</option>
+              <option value="IV">IV</option>
+              <option value="V">V</option>
+            </select>
+          </div>
+          <div class="stats">
+            <span>{{ filteredWastes.length }} записей</span>
+            <span>{{ totalVolume.toFixed(3) }} т</span>
+          </div>
+          <button v-if="wastes.length" @click="clearAll" class="btn-outline">Очистить всё</button>
         </div>
-        
-        <div v-if="filteredWastes.length === 0" class="empty-state">
-          <span class="empty-icon">📭</span>
-          <p>Нет данных. Добавьте первую запись выше.</p>
-        </div>
-        
-        <div v-else class="table-wrapper">
-          <table class="data-table">
+      </section>
+
+      <!-- Таблица -->
+      <section class="section">
+        <div class="table-wrapper">
+          <table v-if="filteredWastes.length" class="table">
             <thead>
               <tr>
                 <th>№</th>
                 <th>Наименование отхода</th>
-                <th>Код ФККО</th>
-                <th>Класс</th>
-                <th>Объём (тонн)</th>
+                <th>ФККО</th>
+                <th>Кл.</th>
+                <th>Объём, т</th>
                 <th>Дата</th>
                 <th>Место</th>
                 <th></th>
@@ -115,83 +151,55 @@
             </thead>
             <tbody>
               <tr v-for="(w, idx) in filteredWastes" :key="w.id">
-                <td class="center">{{ idx + 1 }}</td>
-                <td class="waste-name">{{ w.waste_type }}</td>
+                <td class="num">{{ idx + 1 }}</td>
+                <td>{{ w.waste_type }}</td>
                 <td class="mono">{{ w.fkko_code || '—' }}</td>
-                <td class="center hazard-{{ w.hazard_class }}">{{ w.hazard_class || '—' }}</td>
-                <td class="right">{{ w.volume.toFixed(3) }}</td>
+                <td class="center">{{ w.hazard_class || '—' }}</td>
+                <td class="num">{{ w.volume.toFixed(3) }}</td>
                 <td class="center">{{ w.date || '—' }}</td>
-                <td>{{ w.storage || '—' }}</td>
-                <td class="center">
-                  <button @click="deleteWaste(w.id)" class="btn-icon" title="Удалить">✖</button>
+                <td class="center">{{ w.storage || '—' }}</td>
+                <td class="actions">
+                  <button @click="deleteWaste(w.id)" class="btn-icon">✕</button>
                 </td>
               </tr>
             </tbody>
           </table>
+          <div v-else class="empty">
+            <p>Нет данных. Добавьте первую запись.</p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Генерация отчётов -->
-      <div class="card report-card">
-        <h2>📊 Сформировать отчётность</h2>
-        <div class="report-grid">
-          <div class="report-item">
-            <div class="report-icon">📄</div>
-            <div class="report-info">
-              <h3>2-ТП (отходы)</h3>
-              <p>Годовая форма Росстата</p>
-            </div>
-            <button @click="generate2TPWaste" class="btn btn-report">Сформировать</button>
-          </div>
-          
-          <div class="report-item">
-            <div class="report-icon">🌍</div>
-            <div class="report-info">
-              <h3>4-ОС</h3>
-              <p>Охрана окружающей среды</p>
-            </div>
-            <button @click="generate4OS" class="btn btn-report">Сформировать</button>
-          </div>
-          
-          <div class="report-item">
-            <div class="report-icon">💧</div>
-            <div class="report-info">
-              <h3>Сводка по классам</h3>
-              <p>Анализ по классам опасности</p>
-            </div>
-            <button @click="generateClassSummary" class="btn btn-report">Сформировать</button>
-          </div>
+      <!-- Отчёты -->
+      <section class="section">
+        <div class="section-header">
+          <h2>Отчёты</h2>
         </div>
-        <p class="hint">📎 Excel-файл скачается автоматически с автошириной колонок и форматированием</p>
-      </div>
-      
+        <div class="reports">
+          <button @click="generate2TPWaste" class="btn-report">2-ТП (отходы)</button>
+          <button @click="generate4OS" class="btn-report">4-ОС</button>
+          <button @click="generateClassSummary" class="btn-report">Сводка по классам</button>
+        </div>
+        <p class="hint">Excel скачается автоматически</p>
+      </section>
+
       <!-- Статус -->
-      <div class="status-card">
-        <div class="status-item">
-          <span class="status-dot green"></span>
-          <span>Офлайн-режим</span>
-        </div>
-        <div class="status-item">
-          <span class="status-dot blue"></span>
-          <span>Данные в браузере (localStorage)</span>
-        </div>
-        <div class="status-item">
-          <span class="status-dot gray"></span>
-          <span>Готово к синхронизации с сервером (в плане)</span>
-        </div>
+      <div class="status">
+        <span>● Офлайн-режим</span>
+        <span>● Данные в браузере</span>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import * as XLSX from 'xlsx';
 
-// ============== Хранилище ==============
+// ========== Состояние ==========
 const wastes = ref([]);
+const showCompany = ref(true); // Показываем карточку по умолчанию
 
-// Новая запись
 const newWaste = ref({
   waste_type: '',
   fkko_code: '',
@@ -201,66 +209,50 @@ const newWaste = ref({
   storage: ''
 });
 
-// Фильтры
 const filterYear = ref(null);
 const filterClass = ref(null);
 
-// ============== Computed ==============
+// ========== Computed ==========
 const availableYears = computed(() => {
   const years = wastes.value.map(w => w.date ? new Date(w.date).getFullYear() : null);
-  return [...new Set(years.filter(y => y))].sort((a,b) => b - a);
+  return [...new Set(years.filter(y => y))].sort((a, b) => b - a);
 });
 
 const filteredWastes = computed(() => {
   let result = wastes.value;
-  
   if (filterYear.value) {
     result = result.filter(w => w.date && new Date(w.date).getFullYear() === filterYear.value);
   }
-  
   if (filterClass.value) {
     result = result.filter(w => w.hazard_class === filterClass.value);
   }
-  
   return result;
 });
 
 const totalVolume = computed(() => {
-  return filteredWastes.value.reduce((sum, w) => sum + w.volume, 0);
+  return filteredWastes.value.reduce((s, w) => s + w.volume, 0);
 });
 
-// ============== CRUD операции ==============
+// ========== CRUD ==========
 function saveToLocalStorage() {
   localStorage.setItem('ecolog_wastes', JSON.stringify(wastes.value));
 }
 
 function loadFromLocalStorage() {
   const saved = localStorage.getItem('ecolog_wastes');
-  if (saved) {
-    wastes.value = JSON.parse(saved);
-  }
+  if (saved) wastes.value = JSON.parse(saved);
 }
 
 function addWaste() {
-  if (!newWaste.value.waste_type) {
-    alert('Заполните наименование отхода');
+  if (!newWaste.value.waste_type || !newWaste.value.volume) {
+    alert('Заполните наименование и объём');
     return;
   }
-  if (!newWaste.value.volume || parseFloat(newWaste.value.volume) <= 0) {
-    alert('Введите корректный объём');
-    return;
-  }
-  
   wastes.value.push({
     id: Date.now(),
-    waste_type: newWaste.value.waste_type,
-    fkko_code: newWaste.value.fkko_code,
-    hazard_class: newWaste.value.hazard_class,
-    volume: parseFloat(newWaste.value.volume),
-    date: newWaste.value.date,
-    storage: newWaste.value.storage
+    ...newWaste.value,
+    volume: parseFloat(newWaste.value.volume)
   });
-  
   saveToLocalStorage();
   resetForm();
 }
@@ -282,206 +274,147 @@ function deleteWaste(id) {
 }
 
 function clearAll() {
-  if (confirm('Удалить ВСЕ записи? Отменить будет нельзя.')) {
+  if (confirm('Удалить все записи?')) {
     wastes.value = [];
     saveToLocalStorage();
   }
 }
 
-// ============== Генерация отчётов (с форматированием) ==============
-
-// Автоширина и стилизация
-function applyStyles(ws, data, headerRowIndex = 3) {
-  // 1. Автоширина колонок
-  const colWidths = [];
-  const maxCols = data[0]?.length || 1;
-  
-  for (let col = 0; col < maxCols; col++) {
-    let maxLen = 12;
-    for (let row = 0; row < data.length; row++) {
-      let cell = data[row][col];
-      let val = '';
-      if (cell && typeof cell === 'object' && cell.f) {
-        val = cell.f.toString();
-      } else if (cell) {
-        val = cell.toString();
-      }
-      maxLen = Math.max(maxLen, val.length);
-    }
-    colWidths.push({ wch: Math.min(maxLen + 2, 45) });
-  }
-  ws['!cols'] = colWidths;
-  
-  // 2. Стиль для заголовков
-  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
-  for (let col = range.s.c; col <= range.e.c; col++) {
-    const cellAddr = XLSX.utils.encode_cell({ r: headerRowIndex, c: col });
-    if (ws[cellAddr]) {
-      ws[cellAddr].s = {
-        font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "2D5A27" } },
-        alignment: { horizontal: "center", vertical: "center" }
-      };
-    }
-  }
-  
-  // 3. Итоговая строка
-  const lastRow = data.length - 1;
-  for (let col = range.s.c; col <= range.e.c; col++) {
-    const cellAddr = XLSX.utils.encode_cell({ r: lastRow, c: col });
-    if (ws[cellAddr]) {
-      ws[cellAddr].s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: "F0F0F0" } }
-      };
-    }
-  }
-}
-
+// ========== Генерация отчётов ==========
 function generate2TPWaste() {
-  if (wastes.value.length === 0) {
-    alert('Нет данных для отчёта');
-    return;
-  }
-  
-  const currentYear = new Date().getFullYear();
-  const yearData = wastes.value.filter(w => w.date && new Date(w.date).getFullYear() === currentYear);
-  
-  if (yearData.length === 0) {
-    alert(`Нет данных за ${currentYear} год`);
-    return;
-  }
-  
-  // Группировка по типу отхода
-  const grouped = {};
-  yearData.forEach(w => {
-    const key = w.waste_type;
-    if (!grouped[key]) {
-      grouped[key] = {
-        waste_type: w.waste_type,
-        fkko_code: w.fkko_code,
-        hazard_class: w.hazard_class,
-        volume: 0
-      };
-    }
-    grouped[key].volume += w.volume;
-  });
-  
-  const uniqueWastes = Object.values(grouped);
-  
-  const sheetData = [
-    ['ООО "Z-gold" (Ирокинда / Зун-Холба)'],
-    [`2-ТП (отходы) за ${currentYear} год`],
-    [],
-    ['Наименование отхода', 'Код по ФККО', 'Класс опасности', 'Объём, тонн', 'Объём, кг'],
-    ...uniqueWastes.map(w => [w.waste_type, w.fkko_code || '—', w.hazard_class || '—', w.volume, { f: `=D${uniqueWastes.indexOf(w) + 5}*1000` }]),
-    ['ВСЕГО', '', '', { f: `SUM(D5:D${uniqueWastes.length + 4})` }, { f: `=D${uniqueWastes.length + 5}*1000` }]
-  ];
-  
-  const ws = XLSX.utils.aoa_to_sheet(sheetData);
-  
-  // Объединение ячеек для шапки
-  ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }
-  ];
-  
-  applyStyles(ws, sheetData, 3);
-  
+  if (!wastes.value.length) return alert('Нет данных');
+  const data = [['Наименование', 'ФККО', 'Класс', 'Объём, т'], ...wastes.value.map(w => [w.waste_type, w.fkko_code || '—', w.hazard_class || '—', w.volume])];
+  data.push(['ИТОГО', '', '', { f: `SUM(D2:D${wastes.value.length + 1})` }]);
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{ wch: 35 }, { wch: 20 }, { wch: 10 }, { wch: 15 }];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, `2-ТП_${currentYear}`);
-  XLSX.writeFile(wb, `2-TP_waste_${currentYear}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, '2-ТП');
+  XLSX.writeFile(wb, `2-TP_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
 function generate4OS() {
-  if (wastes.value.length === 0) {
-    alert('Нет данных для отчёта');
-    return;
-  }
-  
-  const currentYear = new Date().getFullYear();
-  const yearData = wastes.value.filter(w => w.date && new Date(w.date).getFullYear() === currentYear);
-  const total = yearData.reduce((sum, w) => sum + w.volume, 0);
-  
-  const byClass = {
-    I: yearData.filter(w => w.hazard_class === 'I').reduce((s, w) => s + w.volume, 0),
-    II: yearData.filter(w => w.hazard_class === 'II').reduce((s, w) => s + w.volume, 0),
-    III: yearData.filter(w => w.hazard_class === 'III').reduce((s, w) => s + w.volume, 0),
-    IV: yearData.filter(w => w.hazard_class === 'IV').reduce((s, w) => s + w.volume, 0),
-    V: yearData.filter(w => w.hazard_class === 'V').reduce((s, w) => s + w.volume, 0)
-  };
-  
-  const sheetData = [
-    ['ООО "Z-gold" (Ирокинда / Зун-Холба)'],
-    [`4-ОС за ${currentYear} год`],
-    [],
-    ['Показатель', 'Значение, тонн'],
-    ['Всего образовано отходов', total],
-    ['I класс опасности', byClass.I],
-    ['II класс опасности', byClass.II],
-    ['III класс опасности', byClass.III],
-    ['IV класс опасности', byClass.IV],
-    ['V класс опасности', byClass.V]
-  ];
-  
-  const ws = XLSX.utils.aoa_to_sheet(sheetData);
-  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }];
-  
-  const colWidths = [{ wch: 30 }, { wch: 20 }];
-  ws['!cols'] = colWidths;
-  
+  if (!wastes.value.length) return alert('Нет данных');
+  const total = wastes.value.reduce((s, w) => s + w.volume, 0);
+  const data = [['Показатель', 'Объём, т'], ['Всего отходов', total], ['I класс', wastes.value.filter(w => w.hazard_class === 'I').reduce((s, w) => s + w.volume, 0)], ['II класс', wastes.value.filter(w => w.hazard_class === 'II').reduce((s, w) => s + w.volume, 0)], ['III класс', wastes.value.filter(w => w.hazard_class === 'III').reduce((s, w) => s + w.volume, 0)], ['IV класс', wastes.value.filter(w => w.hazard_class === 'IV').reduce((s, w) => s + w.volume, 0)], ['V класс', wastes.value.filter(w => w.hazard_class === 'V').reduce((s, w) => s + w.volume, 0)]];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{ wch: 25 }, { wch: 15 }];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, `4-ОС_${currentYear}`);
-  XLSX.writeFile(wb, `4-OS_${currentYear}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, '4-ОС');
+  XLSX.writeFile(wb, `4-OS_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
 function generateClassSummary() {
-  if (wastes.value.length === 0) {
-    alert('Нет данных для отчёта');
-    return;
-  }
-  
-  const byClass = {
-    I: wastes.value.filter(w => w.hazard_class === 'I').reduce((s, w) => s + w.volume, 0),
-    II: wastes.value.filter(w => w.hazard_class === 'II').reduce((s, w) => s + w.volume, 0),
-    III: wastes.value.filter(w => w.hazard_class === 'III').reduce((s, w) => s + w.volume, 0),
-    IV: wastes.value.filter(w => w.hazard_class === 'IV').reduce((s, w) => s + w.volume, 0),
-    V: wastes.value.filter(w => w.hazard_class === 'V').reduce((s, w) => s + w.volume, 0)
-  };
-  
-  const total = Object.values(byClass).reduce((s, v) => s + v, 0);
-  
-  const sheetData = [
-    ['Сводка по классам опасности отходов'],
-    [`Всего: ${total.toFixed(3)} тонн`],
-    [],
-    ['Класс опасности', 'Объём, тонн', 'Доля, %'],
-    ['I', byClass.I, total > 0 ? ((byClass.I / total) * 100).toFixed(1) : 0],
-    ['II', byClass.II, total > 0 ? ((byClass.II / total) * 100).toFixed(1) : 0],
-    ['III', byClass.III, total > 0 ? ((byClass.III / total) * 100).toFixed(1) : 0],
-    ['IV', byClass.IV, total > 0 ? ((byClass.IV / total) * 100).toFixed(1) : 0],
-    ['V', byClass.V, total > 0 ? ((byClass.V / total) * 100).toFixed(1) : 0],
-    [],
-    ['ИТОГО', total, '100']
-  ];
-  
-  const ws = XLSX.utils.aoa_to_sheet(sheetData);
-  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
-  
-  const colWidths = [{ wch: 20 }, { wch: 20 }, { wch: 15 }];
-  ws['!cols'] = colWidths;
-  
+  if (!wastes.value.length) return alert('Нет данных');
+  const classes = { I: 0, II: 0, III: 0, IV: 0, V: 0 };
+  wastes.value.forEach(w => { if (w.hazard_class) classes[w.hazard_class] += w.volume; });
+  const total = Object.values(classes).reduce((s, v) => s + v, 0);
+  const data = [['Класс', 'Объём, т', 'Доля, %'], ...Object.entries(classes).map(([c, v]) => [c, v, total ? ((v / total) * 100).toFixed(1) : 0]), ['ИТОГО', total, '100']];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{ wch: 12 }, { wch: 15 }, { wch: 12 }];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Сводка по классам');
-  XLSX.writeFile(wb, `waste_class_summary_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, 'Сводка');
+  XLSX.writeFile(wb, `summary_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-onMounted(() => {
-  loadFromLocalStorage();
-});
+onMounted(loadFromLocalStorage);
 </script>
 
 <style>
+/* Все стили остаются без изменений, кроме новых добавленных */
+
+/* Карточка предприятия */
+.company-card {
+  background: #fef9e6;
+  border-left: 4px solid #e6a017;
+}
+
+.company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.company-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.company-badge {
+  background: #e6a017;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.company-content {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #ffe0a3;
+}
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.company-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.company-field.full-width {
+  grid-column: span 2;
+}
+
+.company-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8a6e2c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.company-field value {
+  font-size: 14px;
+  color: #1e2a36;
+  font-weight: 500;
+}
+
+.edit-company-btn {
+  background: transparent;
+  border: 1px solid #e6a017;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #e6a017;
+}
+
+.edit-company-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #8a9aa8;
+  padding: 4px 8px;
+}
+
+.toggle-btn:hover {
+  color: #1e2a36;
+}
+
+/* Остальные стили остаются без изменений */
 * {
   margin: 0;
   padding: 0;
@@ -489,328 +422,516 @@ onMounted(() => {
 }
 
 body {
-  background: #f0f4f0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #eef2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1a2a3a;
+  line-height: 1.4;
 }
 
-.app {
-  min-height: 100vh;
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .header {
-  background: linear-gradient(135deg, #1a4a1a 0%, #2d6a2d 100%);
+  background: #1e2a36;
   color: white;
-  padding: 30px 20px;
-}
-
-.header-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 28px 0;
+  border-bottom: 1px solid #2d3e4c;
 }
 
 .header h1 {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
 }
 
 .subtitle {
-  opacity: 0.9;
-  font-size: 16px;
+  font-size: 14px;
+  color: #8a9aa8;
 }
 
 .main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 32px 20px;
 }
 
-.card {
+.section {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
 }
 
-.card h2 {
-  font-size: 20px;
+.section-header {
   margin-bottom: 20px;
-  color: #2d5a27;
-  border-left: 4px solid #2d5a27;
-  padding-left: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9edf2;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1e2a36;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.form-field {
+.field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-field label {
+.field label {
   font-size: 13px;
   font-weight: 500;
-  color: #555;
+  color: #4a5c6c;
 }
 
-.input, .input-small {
+.field input, .field select {
   padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  font-family: inherit;
+  background: white;
+  transition: 0.2s;
 }
 
-.input:focus, .input-small:focus {
+.field input:focus, .field select:focus {
   outline: none;
-  border-color: #2d5a27;
-}
-
-.input-small {
-  width: 150px;
+  border-color: #4a7c8c;
+  box-shadow: 0 0 0 2px rgba(74, 124, 140, 0.1);
 }
 
 .form-actions {
   display: flex;
   gap: 12px;
+  padding-top: 8px;
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+button {
   cursor: pointer;
-  transition: all 0.2s;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: 0.15s;
 }
 
 .btn-primary {
-  background: #2d5a27;
+  background: #2c4c5c;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #1e401a;
+  background: #1e3a48;
 }
 
 .btn-secondary {
-  background: #6c757d;
-  color: white;
+  background: #e9edf2;
+  border: 1px solid #cbd5e1;
+  padding: 8px 20px;
+  border-radius: 6px;
+  color: #2c4c5c;
 }
 
 .btn-secondary:hover {
-  background: #5a6268;
+  background: #dee4eb;
 }
 
-.btn-danger {
-  background: #dc3545;
-  color: white;
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #8b5c5c;
+  font-size: 12px;
 }
 
-.btn-danger:hover {
-  background: #c82333;
-}
-
-.btn-report {
-  background: #0d6efd;
-  color: white;
-  padding: 8px 16px;
-  font-size: 13px;
-}
-
-.btn-report:hover {
-  background: #0b5ed7;
+.btn-outline:hover {
+  border-color: #b91c1c;
+  color: #b91c1c;
 }
 
 .btn-icon {
   background: none;
   border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.2s;
+  font-size: 16px;
+  color: #8a9aa8;
+  padding: 4px 8px;
 }
 
 .btn-icon:hover {
-  color: #dc3545;
+  color: #b91c1c;
 }
 
-.filters-row {
+.btn-report {
+  background: #eef2f5;
+  border: 1px solid #cbd5e1;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1e2a36;
+}
+
+.btn-report:hover {
+  background: #e2e8f0;
+  border-color: #8a9aa8;
+}
+
+.filter-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .filter-group label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  color: #4a5c6c;
+}
+
+.filter-group select {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
 }
 
 .stats {
-  font-size: 14px;
-  color: #555;
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #4a5c6c;
   margin-left: auto;
 }
 
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.stats span {
+  background: #eef2f5;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 .table-wrapper {
   overflow-x: auto;
 }
 
-.data-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.data-table th {
-  background: #f5f5f5;
-  padding: 12px;
+.table th {
   text-align: left;
-  font-weight: 600;
-  border-bottom: 2px solid #ddd;
+  padding: 12px 8px;
+  background: #f7f9fb;
+  font-weight: 500;
+  color: #4a5c6c;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.data-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eee;
+.table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #eef2f5;
+  color: #1e2a36;
 }
 
-.data-table tr:hover {
-  background: #f9f9f9;
+.table tr:hover td {
+  background: #fafcfd;
 }
 
-.waste-name {
-  max-width: 250px;
-  white-space: normal;
-  word-break: break-word;
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .center {
   text-align: center;
 }
 
-.right {
-  text-align: right;
-}
-
 .mono {
   font-family: monospace;
   font-size: 12px;
+  color: #4a5c6c;
 }
 
-.empty-state {
+.actions {
+  text-align: right;
+  padding-right: 8px;
+}
+
+.empty {
   text-align: center;
-  padding: 60px;
-  color: #999;
+  padding: 48px 20px;
+  color: #8a9aa8;
+  font-size: 14px;
 }
 
-.empty-icon {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.report-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.report-item {
+.reports {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: background 0.2s;
-}
-
-.report-item:hover {
-  background: #e9ecef;
-}
-
-.report-icon {
-  font-size: 32px;
-}
-
-.report-info {
-  flex: 1;
-}
-
-.report-info h3 {
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-.report-info p {
-  font-size: 12px;
-  color: #666;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .hint {
   font-size: 12px;
-  color: #666;
+  color: #8a9aa8;
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #eee;
 }
 
-.status-card {
-  background: #e8f5e9;
-  border-radius: 12px;
-  padding: 16px 20px;
+.status {
+  background: #f7f9fb;
+  border-radius: 8px;
+  padding: 12px 20px;
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 24px;
+  font-size: 12px;
+  color: #4a5c6c;
+  border: 1px solid #e2e8f0;
 }
 
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+.company-field .field-value {
+  font-size: 14px;
+  color: #1e2a36;
+  font-weight: 500;
+  margin-top: 2px;
 }
 
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
+/* ========== АДАПТИВ ========== */
+
+/* Планшеты и маленькие ноутбуки (до 1024px) */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .main {
+    padding: 24px 0;
+  }
+  
+  .section {
+    padding: 20px;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .company-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
 }
 
-.status-dot.green {
-  background: #28a745;
+/* Телефоны (до 768px) */
+@media (max-width: 768px) {
+  .header {
+    padding: 20px 0;
+  }
+  
+  .header h1 {
+    font-size: 20px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+  }
+  
+  .section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .section-header h2 {
+    font-size: 16px;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+  
+  /* Фильтры */
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .filter-group {
+    justify-content: space-between;
+  }
+  
+  .filter-group select {
+    width: 60%;
+  }
+  
+  .stats {
+    margin-left: 0;
+    justify-content: center;
+  }
+  
+  .stats span {
+    font-size: 12px;
+  }
+  
+  .btn-outline {
+    width: 100%;
+    padding: 8px;
+  }
+  
+  /* Таблица — горизонтальная прокрутка */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    min-width: 650px;
+    font-size: 12px;
+  }
+  
+  .table th, .table td {
+    padding: 8px 6px;
+  }
+  
+  /* Карточка предприятия */
+  .company-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .company-field.full-width {
+    grid-column: span 1;
+  }
+  
+  .company-field label {
+    font-size: 10px;
+  }
+  
+  .company-field .field-value {
+    font-size: 13px;
+  }
+  
+  .company-title h2 {
+    font-size: 16px;
+  }
+  
+  /* Отчёты */
+  .reports {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-report {
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* Статус */
+  .status {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
 }
 
-.status-dot.blue {
-  background: #17a2b8;
+/* Маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+  
+  .main {
+    padding: 16px 0;
+  }
+  
+  .section {
+    padding: 12px;
+  }
+  
+  .header h1 {
+    font-size: 18px;
+  }
+  
+  .company-badge {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .filter-group select {
+    width: 100%;
+  }
+  
+  .stats {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .table {
+    min-width: 550px;
+  }
+  
+  .btn-icon {
+    padding: 4px 6px;
+  }
+  
+  .edit-company-btn {
+    width: 100%;
+  }
 }
 
-.status-dot.gray {
-  background: #6c757d;
+/* Улучшенный таргетинг для полей ввода на телефонах */
+@media (max-width: 768px) {
+  .field input, 
+  .field select {
+    font-size: 16px; /* Предотвращает зум на iOS */
+    padding: 12px;
+  }
+  
+  button {
+    padding: 12px 16px;
+  }
+  
+  .btn-icon {
+    padding: 8px 8px;
+  }
 }
 </style>
