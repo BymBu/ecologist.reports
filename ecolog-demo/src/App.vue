@@ -8,6 +8,10 @@
     </header>
 
     <main class="main container">
+      <section class="section warning">
+        ⚠️ Чтобы пользоваться в шахте или карьере БЕЗ ИНТЕРНЕТА — добавьте приложение на главный экран телефона. Нажмите „Поделиться“ → „На экран «Домой»“. Это займет 10 секунд.
+      </section>
+
       <!-- Карточка предприятия (ДЕМО) -->
       <section class="section company-card">
         <div class="company-header" @click="showCompany = !showCompany">
@@ -716,6 +720,12 @@ button {
   color: #1e2a36;
   font-weight: 500;
   margin-top: 2px;
+}
+
+.warning {
+  color: red;
+  font-weight: 600;
+  opacity: 0.5;
 }
 
 /* ========== АДАПТИВ ========== */
