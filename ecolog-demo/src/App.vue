@@ -8,8 +8,13 @@
     </header>
 
     <main class="main container">
-      <section class="section warning">
-        ⚠️ Чтобы пользоваться в шахте или карьере БЕЗ ИНТЕРНЕТА — добавьте приложение на главный экран телефона. Нажмите „Поделиться“ → „На экран «Домой»“. Это займет 10 секунд.
+      <section class="offline-warning">
+        <div class="offline-icon">⚠️</div>
+        <div class="offline-text">
+          <strong>ШАХТА / КАРЬЕР — ИНТЕРНЕТ НЕ НУЖЕН</strong>
+          Чтобы приложение работало без сети — <strong>добавьте его на главный экран</strong> телефона.<br>
+          <small>Нажмите «Поделиться» → «На экран «Домой»» (10 секунд).</small>
+        </div>
       </section>
 
       <!-- Карточка предприятия (ДЕМО) -->
@@ -468,6 +473,7 @@ body {
   padding: 24px;
   margin-bottom: 24px;
   border: 1px solid #e2e8f0;
+  margin: 10px;
 }
 
 .section-header {
@@ -501,7 +507,8 @@ body {
   color: #4a5c6c;
 }
 
-.field input, .field select {
+.field input,
+.field select {
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -511,7 +518,8 @@ body {
   transition: 0.2s;
 }
 
-.field input:focus, .field select:focus {
+.field input:focus,
+.field select:focus {
   outline: none;
   border-color: #4a7c8c;
   box-shadow: 0 0 0 2px rgba(74, 124, 140, 0.1);
@@ -726,6 +734,56 @@ button {
   color: red;
   font-weight: 600;
   opacity: 0.5;
+  font-size: 12px;
+}
+
+
+/* Офлайн-инструкция (жирно и понятно) */
+.offline-warning {
+  margin: 10px;
+  background: #ffefcd;
+  border-left: 6px solid #e67e22;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #b45f1b;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.offline-icon {
+  font-size: 28px;
+  background: #e67e22;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.offline-text {
+  flex: 1;
+}
+
+.offline-text strong {
+  font-size: 15px;
+  display: block;
+  margin-bottom: 4px;
+  color: #a15506;
+}
+
+.offline-text small {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: normal;
 }
 
 /* ========== АДАПТИВ ========== */
@@ -735,20 +793,20 @@ button {
   .container {
     padding: 0 16px;
   }
-  
+
   .main {
     padding: 24px 0;
   }
-  
+
   .section {
     padding: 20px;
   }
-  
+
   .form-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 12px;
   }
-  
+
   .company-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
@@ -760,115 +818,116 @@ button {
   .header {
     padding: 20px 0;
   }
-  
+
   .header h1 {
     font-size: 20px;
   }
-  
+
   .subtitle {
     font-size: 12px;
   }
-  
+
   .section {
     padding: 16px;
     margin-bottom: 16px;
   }
-  
+
   .section-header h2 {
     font-size: 16px;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 12px;
     margin-bottom: 20px;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .form-actions button {
     width: 100%;
   }
-  
+
   /* Фильтры */
   .filter-bar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .filter-group {
     justify-content: space-between;
   }
-  
+
   .filter-group select {
     width: 60%;
   }
-  
+
   .stats {
     margin-left: 0;
     justify-content: center;
   }
-  
+
   .stats span {
     font-size: 12px;
   }
-  
+
   .btn-outline {
     width: 100%;
     padding: 8px;
   }
-  
+
   /* Таблица — горизонтальная прокрутка */
   .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .table {
     min-width: 650px;
     font-size: 12px;
   }
-  
-  .table th, .table td {
+
+  .table th,
+  .table td {
     padding: 8px 6px;
   }
-  
+
   /* Карточка предприятия */
   .company-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .company-field.full-width {
     grid-column: span 1;
   }
-  
+
   .company-field label {
     font-size: 10px;
   }
-  
+
   .company-field .field-value {
     font-size: 13px;
   }
-  
+
   .company-title h2 {
     font-size: 16px;
   }
-  
+
   /* Отчёты */
   .reports {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .btn-report {
     width: 100%;
     text-align: center;
   }
-  
+
   /* Статус */
   .status {
     flex-direction: column;
@@ -882,47 +941,47 @@ button {
   .container {
     padding: 0 12px;
   }
-  
+
   .main {
     padding: 16px 0;
   }
-  
+
   .section {
     padding: 12px;
   }
-  
+
   .header h1 {
     font-size: 18px;
   }
-  
+
   .company-badge {
     font-size: 8px;
     padding: 2px 6px;
   }
-  
+
   .filter-group {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .filter-group select {
     width: 100%;
   }
-  
+
   .stats {
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .table {
     min-width: 550px;
   }
-  
+
   .btn-icon {
     padding: 4px 6px;
   }
-  
+
   .edit-company-btn {
     width: 100%;
   }
@@ -930,16 +989,18 @@ button {
 
 /* Улучшенный таргетинг для полей ввода на телефонах */
 @media (max-width: 768px) {
-  .field input, 
+
+  .field input,
   .field select {
-    font-size: 16px; /* Предотвращает зум на iOS */
+    font-size: 16px;
+    /* Предотвращает зум на iOS */
     padding: 12px;
   }
-  
+
   button {
     padding: 12px 16px;
   }
-  
+
   .btn-icon {
     padding: 8px 8px;
   }
