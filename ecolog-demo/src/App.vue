@@ -74,9 +74,11 @@
         <div class="section-header">
           <h2>Новая запись</h2>
         </div>
+
+        <!-- Основная информация -->
         <div class="form-grid">
           <div class="field">
-            <label>Наименование отхода</label>
+            <label>Наименование отхода *</label>
             <input v-model="newWaste.waste_type" type="text" placeholder="Например: Лом черных металлов" />
           </div>
           <div class="field">
@@ -87,19 +89,15 @@
             <label>Класс опасности</label>
             <select v-model="newWaste.hazard_class">
               <option value="">—</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-              <option value="V">V</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
             </select>
           </div>
           <div class="field">
-            <label>Объём, тонн</label>
-            <input v-model="newWaste.volume" type="number" step="0.001" placeholder="0.000" />
-          </div>
-          <div class="field">
-            <label>Дата</label>
+            <label>Дата образования</label>
             <input v-model="newWaste.date" type="date" />
           </div>
           <div class="field">
@@ -107,9 +105,90 @@
             <input v-model="newWaste.storage" type="text" placeholder="Площадка Ирокинда" />
           </div>
         </div>
+
+        <!-- Остатки на начало года -->
+        <div class="form-subsection">
+          <h3>📊 Остатки на начало года</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label>Хранение, тонн</label>
+              <input v-model.number="newWaste.start_storage" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Накопление, тонн</label>
+              <input v-model.number="newWaste.start_accum" type="number" step="0.001" placeholder="0.000" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Движение отходов -->
+        <div class="form-subsection">
+          <h3>🔄 Движение отходов за отчётный период</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label>Образовано, тонн</label>
+              <input v-model.number="newWaste.generated" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Получено от других, тонн</label>
+              <input v-model.number="newWaste.received" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Обработано, тонн</label>
+              <input v-model.number="newWaste.processed" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Утилизировано, тонн</label>
+              <input v-model.number="newWaste.recycled" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Обезврежено, тонн</label>
+              <input v-model.number="newWaste.neutralized" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Передано другим, тонн</label>
+              <input v-model.number="newWaste.transferred" type="number" step="0.001" placeholder="0.000" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Размещение -->
+        <div class="form-subsection">
+          <h3>🏭 Размещено на эксплуатируемых объектах</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label>Всего, тонн</label>
+              <input v-model.number="newWaste.placed_total" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Хранение, тонн</label>
+              <input v-model.number="newWaste.placed_storage" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Захоронение, тонн</label>
+              <input v-model.number="newWaste.placed_disposal" type="number" step="0.001" placeholder="0.000" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Остатки на конец года -->
+        <div class="form-subsection">
+          <h3>📉 Остатки на конец года</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label>Хранение, тонн</label>
+              <input v-model.number="newWaste.end_storage" type="number" step="0.001" placeholder="0.000" />
+            </div>
+            <div class="field">
+              <label>Накопление, тонн</label>
+              <input v-model.number="newWaste.end_accum" type="number" step="0.001" placeholder="0.000" />
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions">
-          <button @click="addWaste" class="btn-primary">Сохранить</button>
-          <button @click="resetForm" class="btn-secondary">Очистить</button>
+          <button @click="addWaste" class="btn-primary">💾 Сохранить</button>
+          <button @click="resetForm" class="btn-secondary">Очистить форму</button>
         </div>
       </section>
 
@@ -127,11 +206,11 @@
             <label>Класс</label>
             <select v-model="filterClass">
               <option :value="null">Все</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-              <option value="V">V</option>
+              <option value="I">1</option>
+              <option value="II">2</option>
+              <option value="III">3</option>
+              <option value="IV">4</option>
+              <option value="V">5</option>
             </select>
           </div>
           <div class="stats">
@@ -152,7 +231,8 @@
                 <th>Наименование отхода</th>
                 <th>ФККО</th>
                 <th>Кл.</th>
-                <th>Объём, т</th>
+                <th>Образовано, т</th>
+                <th>Передано, т</th>
                 <th>Дата</th>
                 <th>Место</th>
                 <th></th>
@@ -164,7 +244,8 @@
                 <td>{{ w.waste_type }}</td>
                 <td class="mono">{{ w.fkko_code || '—' }}</td>
                 <td class="center">{{ w.hazard_class || '—' }}</td>
-                <td class="num">{{ w.volume.toFixed(3) }}</td>
+                <td class="num">{{ (w.generated || 0).toFixed(3) }}</td>
+                <td class="num">{{ (w.transferred || 0).toFixed(3) }}</td>
                 <td class="center">{{ w.date || '—' }}</td>
                 <td class="center">{{ w.storage || '—' }}</td>
                 <td class="actions">
@@ -203,21 +284,36 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 // ========== Состояние ==========
 const wastes = ref([]);
-const showCompany = ref(true); // Показываем карточку по умолчанию
+const showCompany = ref(true);
 
+// Новая запись
 const newWaste = ref({
   waste_type: '',
   fkko_code: '',
   hazard_class: '',
-  volume: '',
   date: new Date().toISOString().slice(0, 10),
-  storage: ''
+  storage: '',
+  start_storage: 0,
+  start_accum: 0,
+  generated: 0,
+  received: 0,
+  processed: 0,
+  recycled: 0,
+  neutralized: 0,
+  transferred: 0,
+  placed_total: 0,
+  placed_storage: 0,
+  placed_disposal: 0,
+  end_storage: 0,
+  end_accum: 0
 });
 
+// Фильтры
 const filterYear = ref(null);
 const filterClass = ref(null);
 
@@ -239,7 +335,7 @@ const filteredWastes = computed(() => {
 });
 
 const totalVolume = computed(() => {
-  return filteredWastes.value.reduce((s, w) => s + w.volume, 0);
+  return filteredWastes.value.reduce((s, w) => s + (w.generated || 0), 0);
 });
 
 // ========== CRUD ==========
@@ -253,15 +349,29 @@ function loadFromLocalStorage() {
 }
 
 function addWaste() {
-  if (!newWaste.value.waste_type || !newWaste.value.volume) {
-    alert('Заполните наименование и объём');
+  if (!newWaste.value.waste_type) {
+    alert('Заполните наименование отхода');
     return;
   }
+
   wastes.value.push({
     id: Date.now(),
     ...newWaste.value,
-    volume: parseFloat(newWaste.value.volume)
+    start_storage: Number(newWaste.value.start_storage) || 0,
+    start_accum: Number(newWaste.value.start_accum) || 0,
+    generated: Number(newWaste.value.generated) || 0,
+    received: Number(newWaste.value.received) || 0,
+    processed: Number(newWaste.value.processed) || 0,
+    recycled: Number(newWaste.value.recycled) || 0,
+    neutralized: Number(newWaste.value.neutralized) || 0,
+    transferred: Number(newWaste.value.transferred) || 0,
+    placed_total: Number(newWaste.value.placed_total) || 0,
+    placed_storage: Number(newWaste.value.placed_storage) || 0,
+    placed_disposal: Number(newWaste.value.placed_disposal) || 0,
+    end_storage: Number(newWaste.value.end_storage) || 0,
+    end_accum: Number(newWaste.value.end_accum) || 0
   });
+
   saveToLocalStorage();
   resetForm();
 }
@@ -271,9 +381,21 @@ function resetForm() {
     waste_type: '',
     fkko_code: '',
     hazard_class: '',
-    volume: '',
     date: new Date().toISOString().slice(0, 10),
-    storage: ''
+    storage: '',
+    start_storage: 0,
+    start_accum: 0,
+    generated: 0,
+    received: 0,
+    processed: 0,
+    recycled: 0,
+    neutralized: 0,
+    transferred: 0,
+    placed_total: 0,
+    placed_storage: 0,
+    placed_disposal: 0,
+    end_storage: 0,
+    end_accum: 0
   };
 }
 
@@ -289,720 +411,206 @@ function clearAll() {
   }
 }
 
-// ========== Генерация отчётов ==========
-function generate2TPWaste() {
+// ========== ГЕНЕРАЦИЯ EXCEL (ExcelJS) ==========
+async function generate2TPWaste() {
   if (!wastes.value.length) return alert('Нет данных');
-  const data = [['Наименование', 'ФККО', 'Класс', 'Объём, т'], ...wastes.value.map(w => [w.waste_type, w.fkko_code || '—', w.hazard_class || '—', w.volume])];
-  data.push(['ИТОГО', '', '', { f: `SUM(D2:D${wastes.value.length + 1})` }]);
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{ wch: 35 }, { wch: 20 }, { wch: 10 }, { wch: 15 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '2-ТП');
-  XLSX.writeFile(wb, `2-TP_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('2-ТП (отходы)');
+
+  // --- Настройка колонок  ---
+  worksheet.columns = Array(17).fill({ width: 16 });
+
+  // --- Базовый стиль (границы + центровка + перенос) ---
+  const baseStyle = {
+    font: { size: 10, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+    border: {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    }
+  };
+
+  const numberStyle = {
+    font: { size: 9, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+    border: {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    }
+  };
+
+  const dataStyle = {
+    numFmt: '#,##0.00', // Формат чисел
+    alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+    border: {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    }
+  };
+  
+  // Стиль для первой колонки (N строки) - целое число
+  const indexStyle = {
+    numFmt: '0',
+    alignment: { horizontal: 'center', vertical: 'middle' },
+    border: {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' }
+    }
+  };
+
+  // --- СТРОКА 1: Главные заголовки ---
+  const row1Values = [
+    'N строки', 
+    'Наименование вида отхода', 
+    'Код по ФККО', 
+    'Класс опасности вида отхода', 
+    
+    'Наличие отходов на начало отчетного периода, тонн', '', 
+    
+    'Образовано отходов в отчетном периоде, тонн', 
+    'Получено отходов от других лиц в отчетном периоде, тонн', 
+    'Обработано отходов в отчетном периоде, тонн', 
+    'Утилизировано отходов в отчетном периоде, тонн', 
+    'Обезврежено отходов в отчетном периоде, тонн', 
+    'Передано отходов за отчетный период, тонн', 
+    
+    'Размещено отходов на эксплуатируемых объектах в отчетном периоде, тонн', '', '', 
+    
+    'Наличие отходов на конец отчетного периода, тонн', ''  
+  ];
+  const row1 = worksheet.addRow(row1Values);
+  row1.height = 45;
+
+  // --- СТРОКА 2: Подзаголовки ---
+  const row2Values = [
+    '', '', '', '', 
+    'Хранение', 'Накопление', 
+    '', '', '', '', '', '', 
+    'Всего', 'Хранение', 'Захоронение', 
+    'Хранение', 'Накопление' 
+  ];
+  const row2 = worksheet.addRow(row2Values);
+  row2.height = 90;
+
+  // --- СТРОКА 3: Нумерация ---
+  const row3Values = [
+    'А', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'
+  ];
+  const row3 = worksheet.addRow(row3Values);
+  row3.height = 20;
+
+  // --- Стили шапки ---
+  row1.eachCell((cell) => { cell.style = baseStyle; });
+  row2.eachCell((cell) => { cell.style = baseStyle; });
+  row3.eachCell((cell) => { cell.style = numberStyle; });
+
+  // --- СЛИЯНИЯ ---
+  worksheet.mergeCells('A1:A2');
+  worksheet.mergeCells('B1:B2');
+  worksheet.mergeCells('C1:C2');
+  worksheet.mergeCells('D1:D2');
+
+  worksheet.mergeCells('G1:G2');
+  worksheet.mergeCells('H1:H2');
+  worksheet.mergeCells('I1:I2');
+  worksheet.mergeCells('J1:J2');
+  worksheet.mergeCells('K1:K2');
+  worksheet.mergeCells('L1:L2');
+
+  worksheet.mergeCells('E1:F1');
+  worksheet.mergeCells('M1:O1');
+  worksheet.mergeCells('P1:Q1');
+
+  // --- ДАННЫЕ ---
+  wastes.value.forEach((w, idx) => {
+    const rowData = [
+      idx + 1, // Это число
+      w.waste_type,
+      w.fkko_code || '—',
+      w.hazard_class || '—',
+      Number(w.start_storage) || 0, 
+      Number(w.start_accum) || 0,
+      Number(w.generated) || 0, 
+      Number(w.received) || 0, 
+      Number(w.processed) || 0, 
+      Number(w.recycled) || 0, 
+      Number(w.neutralized) || 0, 
+      Number(w.transferred) || 0,
+      Number(w.placed_total) || 0, 
+      Number(w.placed_storage) || 0, 
+      Number(w.placed_disposal) || 0,
+      Number(w.end_storage) || 0, 
+      Number(w.end_accum) || 0
+    ];
+    
+    const row = worksheet.addRow(rowData);
+    row.height = 90; 
+    
+    // Применяем стили вручную, чтобы первая колонка была целой, а остальные дробными
+    row.eachCell((cell, colNumber) => {
+      if (colNumber === 1) {
+        cell.style = indexStyle; // Первая колонка - целое число
+      } else {
+        cell.style = dataStyle; // Остальные - дробные
+      }
+    });
+  });
+
+  // --- Сохранение ---
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `2-TP_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-function generate4OS() {
-  if (!wastes.value.length) return alert('Нет данных');
-  const total = wastes.value.reduce((s, w) => s + w.volume, 0);
-  const data = [['Показатель', 'Объём, т'], ['Всего отходов', total], ['I класс', wastes.value.filter(w => w.hazard_class === 'I').reduce((s, w) => s + w.volume, 0)], ['II класс', wastes.value.filter(w => w.hazard_class === 'II').reduce((s, w) => s + w.volume, 0)], ['III класс', wastes.value.filter(w => w.hazard_class === 'III').reduce((s, w) => s + w.volume, 0)], ['IV класс', wastes.value.filter(w => w.hazard_class === 'IV').reduce((s, w) => s + w.volume, 0)], ['V класс', wastes.value.filter(w => w.hazard_class === 'V').reduce((s, w) => s + w.volume, 0)]];
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{ wch: 25 }, { wch: 15 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '4-ОС');
-  XLSX.writeFile(wb, `4-OS_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
 
-function generateClassSummary() {
-  if (!wastes.value.length) return alert('Нет данных');
-  const classes = { I: 0, II: 0, III: 0, IV: 0, V: 0 };
-  wastes.value.forEach(w => { if (w.hazard_class) classes[w.hazard_class] += w.volume; });
-  const total = Object.values(classes).reduce((s, v) => s + v, 0);
-  const data = [['Класс', 'Объём, т', 'Доля, %'], ...Object.entries(classes).map(([c, v]) => [c, v, total ? ((v / total) * 100).toFixed(1) : 0]), ['ИТОГО', total, '100']];
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{ wch: 12 }, { wch: 15 }, { wch: 12 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Сводка');
-  XLSX.writeFile(wb, `summary_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
+
+
+
+
+
+
+// Остальные отчеты можно тоже переписать на ExcelJS, но пока оставим как есть, если они работают
+// function generate4OS() {
+//   if (!wastes.value.length) return alert('Нет данных');
+//   const total = wastes.value.reduce((s, w) => s + (w.generated || 0), 0);
+//   const data = [
+//     ['Показатель', 'Объём, т'],
+//     ['Всего отходов (образовано)', total],
+//     ['I класс', wastes.value.filter(w => w.hazard_class === 'I').reduce((s, w) => s + (w.generated || 0), 0)],
+//     ['II класс', wastes.value.filter(w => w.hazard_class === 'II').reduce((s, w) => s + (w.generated || 0), 0)],
+//     ['III класс', wastes.value.filter(w => w.hazard_class === 'III').reduce((s, w) => s + (w.generated || 0), 0)],
+//     ['IV класс', wastes.value.filter(w => w.hazard_class === 'IV').reduce((s, w) => s + (w.generated || 0), 0)],
+//     ['V класс', wastes.value.filter(w => w.hazard_class === 'V').reduce((s, w) => s + (w.generated || 0), 0)]
+//   ];
+//   // Для простоты остальные оставим на XLSX, так как там нет сложной верстки
+//   import('xlsx').then(XLSX => {
+//     const ws = XLSX.utils.aoa_to_sheet(data);
+//     ws['!cols'] = [{ wch: 25 }, { wch: 15 }];
+//     const wb = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(wb, ws, '4-ОС');
+//     XLSX.writeFile(wb, `4-OS_${new Date().toISOString().slice(0, 10)}.xlsx`);
+//   });
+// }
+
+// function generateClassSummary() {
+//   if (!wastes.value.length) return alert('Нет данных');
+//   const classes = { I: 0, II: 0, III: 0, IV: 0, V: 0 };
+//   wastes.value.forEach(w => { if (w.hazard_class) classes[w.hazard_class] += (w.generated || 0); });
+//   const total = Object.values(classes).reduce((s, v) => s + v, 0);
+//   const data = [
+//     ['Класс', 'Объём, т', 'Доля, %'],
+//     ...Object.entries(classes).map(([c, v]) => [c, v, total ? ((v / total) * 100).toFixed(1) : 0]),
+//     ['ИТОГО', total, '100']
+//   ];
+//   import('xlsx').then(XLSX => {
+//     const ws = XLSX.utils.aoa_to_sheet(data);
+//     ws['!cols'] = [{ wch: 12 }, { wch: 15 }, { wch: 12 }];
+//     const wb = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(wb, ws, 'Сводка');
+//     XLSX.writeFile(wb, `summary_${new Date().toISOString().slice(0, 10)}.xlsx`);
+//   });
+// }
 
 onMounted(loadFromLocalStorage);
 </script>
-
-<style>
-/* Все стили остаются без изменений, кроме новых добавленных */
-
-/* Карточка предприятия */
-.company-card {
-  background: #fef9e6;
-  border-left: 4px solid #e6a017;
-}
-
-.company-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-}
-
-.company-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.company-badge {
-  background: #e6a017;
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 2px 8px;
-  border-radius: 20px;
-  letter-spacing: 0.5px;
-}
-
-.company-content {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #ffe0a3;
-}
-
-.company-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.company-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.company-field.full-width {
-  grid-column: span 2;
-}
-
-.company-field label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #8a6e2c;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.company-field value {
-  font-size: 14px;
-  color: #1e2a36;
-  font-weight: 500;
-}
-
-.edit-company-btn {
-  background: transparent;
-  border: 1px solid #e6a017;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #e6a017;
-}
-
-.edit-company-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.toggle-btn {
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: #8a9aa8;
-  padding: 4px 8px;
-}
-
-.toggle-btn:hover {
-  color: #1e2a36;
-}
-
-/* Остальные стили остаются без изменений */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background: #eef2f5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #1a2a3a;
-  line-height: 1.4;
-}
-
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.header {
-  background: #1e2a36;
-  color: white;
-  padding: 28px 0;
-  border-bottom: 1px solid #2d3e4c;
-}
-
-.header h1 {
-  font-size: 24px;
-  font-weight: 500;
-  letter-spacing: -0.2px;
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: #8a9aa8;
-}
-
-.main {
-  padding: 32px 20px;
-}
-
-.section {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid #e2e8f0;
-  margin: 10px;
-}
-
-.section-header {
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e9edf2;
-}
-
-.section-header h2 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #1e2a36;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #4a5c6c;
-}
-
-.field input,
-.field select {
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  background: white;
-  transition: 0.2s;
-}
-
-.field input:focus,
-.field select:focus {
-  outline: none;
-  border-color: #4a7c8c;
-  box-shadow: 0 0 0 2px rgba(74, 124, 140, 0.1);
-}
-
-.form-actions {
-  display: flex;
-  gap: 12px;
-  padding-top: 8px;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  transition: 0.15s;
-}
-
-.btn-primary {
-  background: #2c4c5c;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 6px;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #1e3a48;
-}
-
-.btn-secondary {
-  background: #e9edf2;
-  border: 1px solid #cbd5e1;
-  padding: 8px 20px;
-  border-radius: 6px;
-  color: #2c4c5c;
-}
-
-.btn-secondary:hover {
-  background: #dee4eb;
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid #cbd5e1;
-  padding: 6px 12px;
-  border-radius: 6px;
-  color: #8b5c5c;
-  font-size: 12px;
-}
-
-.btn-outline:hover {
-  border-color: #b91c1c;
-  color: #b91c1c;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  font-size: 16px;
-  color: #8a9aa8;
-  padding: 4px 8px;
-}
-
-.btn-icon:hover {
-  color: #b91c1c;
-}
-
-.btn-report {
-  background: #eef2f5;
-  border: 1px solid #cbd5e1;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #1e2a36;
-}
-
-.btn-report:hover {
-  background: #e2e8f0;
-  border-color: #8a9aa8;
-}
-
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-size: 13px;
-  color: #4a5c6c;
-}
-
-.filter-group select {
-  padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: white;
-  font-size: 13px;
-}
-
-.stats {
-  display: flex;
-  gap: 16px;
-  font-size: 13px;
-  color: #4a5c6c;
-  margin-left: auto;
-}
-
-.stats span {
-  background: #eef2f5;
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.table th {
-  text-align: left;
-  padding: 12px 8px;
-  background: #f7f9fb;
-  font-weight: 500;
-  color: #4a5c6c;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.table td {
-  padding: 12px 8px;
-  border-bottom: 1px solid #eef2f5;
-  color: #1e2a36;
-}
-
-.table tr:hover td {
-  background: #fafcfd;
-}
-
-.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.center {
-  text-align: center;
-}
-
-.mono {
-  font-family: monospace;
-  font-size: 12px;
-  color: #4a5c6c;
-}
-
-.actions {
-  text-align: right;
-  padding-right: 8px;
-}
-
-.empty {
-  text-align: center;
-  padding: 48px 20px;
-  color: #8a9aa8;
-  font-size: 14px;
-}
-
-.reports {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.hint {
-  font-size: 12px;
-  color: #8a9aa8;
-  margin-top: 12px;
-}
-
-.status {
-  background: #f7f9fb;
-  border-radius: 8px;
-  padding: 12px 20px;
-  display: flex;
-  gap: 24px;
-  font-size: 12px;
-  color: #4a5c6c;
-  border: 1px solid #e2e8f0;
-}
-
-.company-field .field-value {
-  font-size: 14px;
-  color: #1e2a36;
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-.warning {
-  color: red;
-  font-weight: 600;
-  opacity: 0.5;
-  font-size: 12px;
-}
-
-
-/* Офлайн-инструкция (жирно и понятно) */
-.offline-warning {
-  margin: 10px;
-  background: #ffefcd;
-  border-left: 6px solid #e67e22;
-  padding: 16px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #b45f1b;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.offline-icon {
-  font-size: 28px;
-  background: #e67e22;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.offline-text {
-  flex: 1;
-}
-
-.offline-text strong {
-  font-size: 15px;
-  display: block;
-  margin-bottom: 4px;
-  color: #a15506;
-}
-
-.offline-text small {
-  font-size: 12px;
-  opacity: 0.8;
-  font-weight: normal;
-}
-
-/* ========== АДАПТИВ ========== */
-
-/* Планшеты и маленькие ноутбуки (до 1024px) */
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 16px;
-  }
-
-  .main {
-    padding: 24px 0;
-  }
-
-  .section {
-    padding: 20px;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-  }
-
-  .company-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
-  }
-}
-
-/* Телефоны (до 768px) */
-@media (max-width: 768px) {
-  .header {
-    padding: 20px 0;
-  }
-
-  .header h1 {
-    font-size: 20px;
-  }
-
-  .subtitle {
-    font-size: 12px;
-  }
-
-  .section {
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  .section-header h2 {
-    font-size: 16px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-actions button {
-    width: 100%;
-  }
-
-  /* Фильтры */
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .filter-group {
-    justify-content: space-between;
-  }
-
-  .filter-group select {
-    width: 60%;
-  }
-
-  .stats {
-    margin-left: 0;
-    justify-content: center;
-  }
-
-  .stats span {
-    font-size: 12px;
-  }
-
-  .btn-outline {
-    width: 100%;
-    padding: 8px;
-  }
-
-  /* Таблица — горизонтальная прокрутка */
-  .table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .table {
-    min-width: 650px;
-    font-size: 12px;
-  }
-
-  .table th,
-  .table td {
-    padding: 8px 6px;
-  }
-
-  /* Карточка предприятия */
-  .company-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .company-field.full-width {
-    grid-column: span 1;
-  }
-
-  .company-field label {
-    font-size: 10px;
-  }
-
-  .company-field .field-value {
-    font-size: 13px;
-  }
-
-  .company-title h2 {
-    font-size: 16px;
-  }
-
-  /* Отчёты */
-  .reports {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .btn-report {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* Статус */
-  .status {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
-  }
-}
-
-/* Маленькие телефоны (до 480px) */
-@media (max-width: 480px) {
-  .container {
-    padding: 0 12px;
-  }
-
-  .main {
-    padding: 16px 0;
-  }
-
-  .section {
-    padding: 12px;
-  }
-
-  .header h1 {
-    font-size: 18px;
-  }
-
-  .company-badge {
-    font-size: 8px;
-    padding: 2px 6px;
-  }
-
-  .filter-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .filter-group select {
-    width: 100%;
-  }
-
-  .stats {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .table {
-    min-width: 550px;
-  }
-
-  .btn-icon {
-    padding: 4px 6px;
-  }
-
-  .edit-company-btn {
-    width: 100%;
-  }
-}
-
-/* Улучшенный таргетинг для полей ввода на телефонах */
-@media (max-width: 768px) {
-
-  .field input,
-  .field select {
-    font-size: 16px;
-    /* Предотвращает зум на iOS */
-    padding: 12px;
-  }
-
-  button {
-    padding: 12px 16px;
-  }
-
-  .btn-icon {
-    padding: 8px 8px;
-  }
-}
-</style>
