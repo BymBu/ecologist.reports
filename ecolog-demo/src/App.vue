@@ -8,13 +8,17 @@
     </header>
 
     <main class="main container">
-      <section class="offline-warning">
-        <div class="offline-icon">⚠️</div>
-        <div class="offline-text">
-          <strong>ШАХТА / КАРЬЕР — ИНТЕРНЕТ НЕ НУЖЕН</strong>
-          Чтобы приложение работало без сети — <strong>добавьте его на главный экран</strong> телефона.<br>
-          <small>Нажмите «Поделиться» → «На экран «Домой»» (10 секунд).</small>
+      <section v-if="showNotify" class="offline-warning">
+        <div class="offline-warging--wrapper">
+          <div class="offline-icon">⚠️</div>
+          <div class="offline-text">
+            <strong>ШАХТА / КАРЬЕР — ИНТЕРНЕТ НЕ НУЖЕН</strong>
+            Чтобы приложение работало без сети — <strong>добавьте его на главный экран</strong> телефона.<br>
+            <small>Нажмите «Поделиться» → «На экран «Домой»» (10 секунд).</small>
+          </div>
         </div>
+
+        <button @click="showNotify = false" class="btn__close">x</button>
       </section>
 
       <!-- Карточка предприятия (ДЕМО) -->
@@ -244,8 +248,8 @@
                 <td>{{ w.waste_type }}</td>
                 <td class="mono">{{ w.fkko_code || '—' }}</td>
                 <td class="center">{{ w.hazard_class || '—' }}</td>
-                <td class="num">{{ (w.generated || 0).toFixed(3) }}</td>
-                <td class="num">{{ (w.transferred || 0).toFixed(3) }}</td>
+                <td class="center">{{ (w.generated || 0).toFixed(3) }}</td>
+                <td class="center">{{ (w.transferred || 0).toFixed(3) }}</td>
                 <td class="center">{{ w.date || '—' }}</td>
                 <td class="center">{{ w.storage || '—' }}</td>
                 <td class="actions">
@@ -286,6 +290,9 @@
 import { ref, computed, onMounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+
+// уведомление
+const showNotify = ref(true);
 
 // ========== Состояние ==========
 const wastes = ref([]);
@@ -419,7 +426,7 @@ async function generate2TPWaste() {
   const worksheet = workbook.addWorksheet('2-ТП (отходы)');
 
   // --- Настройка колонок  ---
-  worksheet.columns = Array(17).fill({ width: 16 });
+  worksheet.columns = Array(12).fill({ width: 16 }); // Последние 5 колонок не трогаем, пусть останется дефолт ширина
 
   // --- Базовый стиль (границы + центровка + перенос) ---
   const baseStyle = {
@@ -448,7 +455,7 @@ async function generate2TPWaste() {
       bottom: { style: 'thin' }, right: { style: 'thin' }
     }
   };
-  
+
   // Стиль для первой колонки (N строки) - целое число
   const indexStyle = {
     numFmt: '0',
@@ -461,34 +468,34 @@ async function generate2TPWaste() {
 
   // --- СТРОКА 1: Главные заголовки ---
   const row1Values = [
-    'N строки', 
-    'Наименование вида отхода', 
-    'Код по ФККО', 
-    'Класс опасности вида отхода', 
-    
-    'Наличие отходов на начало отчетного периода, тонн', '', 
-    
-    'Образовано отходов в отчетном периоде, тонн', 
-    'Получено отходов от других лиц в отчетном периоде, тонн', 
-    'Обработано отходов в отчетном периоде, тонн', 
-    'Утилизировано отходов в отчетном периоде, тонн', 
-    'Обезврежено отходов в отчетном периоде, тонн', 
-    'Передано отходов за отчетный период, тонн', 
-    
-    'Размещено отходов на эксплуатируемых объектах в отчетном периоде, тонн', '', '', 
-    
-    'Наличие отходов на конец отчетного периода, тонн', ''  
+    'N строки',
+    'Наименование вида отхода',
+    'Код по ФККО',
+    'Класс опасности вида отхода',
+
+    'Наличие отходов на начало отчетного периода, тонн', '',
+
+    'Образовано отходов в отчетном периоде, тонн',
+    'Получено отходов от других лиц в отчетном периоде, тонн',
+    'Обработано отходов в отчетном периоде, тонн',
+    'Утилизировано отходов в отчетном периоде, тонн',
+    'Обезврежено отходов в отчетном периоде, тонн',
+    'Передано отходов за отчетный период, тонн',
+
+    'Размещено отходов на эксплуатируемых объектах в отчетном периоде, тонн', '', '',
+
+    'Наличие отходов на конец отчетного периода, тонн', ''
   ];
   const row1 = worksheet.addRow(row1Values);
   row1.height = 45;
 
   // --- СТРОКА 2: Подзаголовки ---
   const row2Values = [
-    '', '', '', '', 
-    'Хранение', 'Накопление', 
-    '', '', '', '', '', '', 
-    'Всего', 'Хранение', 'Захоронение', 
-    'Хранение', 'Накопление' 
+    '', '', '', '',
+    'Хранение', 'Накопление',
+    '', '', '', '', '', '',
+    'Всего', 'Хранение', 'Захоронение',
+    'Хранение', 'Накопление'
   ];
   const row2 = worksheet.addRow(row2Values);
   row2.height = 90;
@@ -529,24 +536,24 @@ async function generate2TPWaste() {
       w.waste_type,
       w.fkko_code || '—',
       w.hazard_class || '—',
-      Number(w.start_storage) || 0, 
+      Number(w.start_storage) || 0,
       Number(w.start_accum) || 0,
-      Number(w.generated) || 0, 
-      Number(w.received) || 0, 
-      Number(w.processed) || 0, 
-      Number(w.recycled) || 0, 
-      Number(w.neutralized) || 0, 
+      Number(w.generated) || 0,
+      Number(w.received) || 0,
+      Number(w.processed) || 0,
+      Number(w.recycled) || 0,
+      Number(w.neutralized) || 0,
       Number(w.transferred) || 0,
-      Number(w.placed_total) || 0, 
-      Number(w.placed_storage) || 0, 
+      Number(w.placed_total) || 0,
+      Number(w.placed_storage) || 0,
       Number(w.placed_disposal) || 0,
-      Number(w.end_storage) || 0, 
+      Number(w.end_storage) || 0,
       Number(w.end_accum) || 0
     ];
-    
+
     const row = worksheet.addRow(rowData);
-    row.height = 90; 
-    
+    row.height = 90;
+
     // Применяем стили вручную, чтобы первая колонка была целой, а остальные дробными
     row.eachCell((cell, colNumber) => {
       if (colNumber === 1) {
