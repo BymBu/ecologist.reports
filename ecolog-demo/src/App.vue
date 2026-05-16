@@ -3,283 +3,175 @@
     <header class="header">
       <div class="container">
         <h1>Эколог.Отчёты</h1>
-        <p class="subtitle">Учёт отходов и автоматическая отчётность</p>
+        <p class="subtitle">Учёт отходов на объекте</p>
       </div>
     </header>
 
     <main class="main container">
+      <!-- Офлайн-напоминалка (закрывается) -->
       <section v-if="showNotify" class="offline-warning">
-        <div class="offline-warging--wrapper">
+        <div class="offline-warning--wrapper">
           <div class="offline-icon">⚠️</div>
           <div class="offline-text">
-            <strong>ШАХТА / КАРЬЕР — ИНТЕРНЕТ НЕ НУЖЕН</strong>
-            Чтобы приложение работало без сети — <strong>добавьте его на главный экран</strong> телефона.<br>
-            <small>Нажмите «Поделиться» → «На экран «Домой»» (10 секунд).</small>
+            <strong>ИНТЕРНЕТ НЕ НУЖЕН</strong>
+            Добавьте приложение на главный экран телефона: «Поделиться» → «На экран «Домой»»
           </div>
         </div>
-
-        <button @click="showNotify = false" class="btn__close">x</button>
+        <button @click="showNotify = false" class="btn__close">✕</button>
       </section>
 
-      <!-- Карточка предприятия (ДЕМО) -->
+      <!-- Карточка предприятия (сворачивается) -->
       <section class="section company-card">
         <div class="company-header" @click="showCompany = !showCompany">
           <div class="company-title">
             <span class="company-badge">ДЕМО</span>
-            <h2>🏢 Реквизиты предприятия</h2>
+            <h2>Предприятие</h2>
           </div>
           <button class="btn-icon toggle-btn">{{ showCompany ? '▼' : '▶' }}</button>
         </div>
-        <div v-if="showCompany" class="company-content">
+        <div v-if="!showCompany" class="company-content">
           <div class="company-grid">
-            <div class="company-field">
-              <label>ИНН</label>
-              <div class="field-value">0323123456</div>
+            <div class="company-field"><label>ИНН</label>
+              <div>0323123456</div>
             </div>
-            <div class="company-field">
-              <label>ОГРН</label>
-              <div class="field-value">1020304050607</div>
+            <div class="company-field"><label>ОГРН</label>
+              <div>1020304050607</div>
             </div>
-            <div class="company-field">
-              <label>КПП</label>
-              <div class="field-value">032301001</div>
+            <div class="company-field"><label>КПП</label>
+              <div>032301001</div>
             </div>
-            <div class="company-field">
-              <label>Краткое наименование</label>
-              <div class="field-value">ООО "Z-gold"</div>
-            </div>
-            <div class="company-field full-width">
-              <label>Полное наименование</label>
-              <div class="field-value">Общество с ограниченной ответственностью "Z-gold"</div>
-            </div>
-            <div class="company-field">
-              <label>ОКПО</label>
-              <div class="field-value">12345678</div>
-            </div>
-            <div class="company-field">
-              <label>ОКТМО</label>
-              <div class="field-value">81623456</div>
-            </div>
-            <div class="company-field full-width">
-              <label>Юридический адрес</label>
-              <div class="field-value">670000, Республика Бурятия, г. Улан-Удэ, ул. Ленина, д. 1</div>
-            </div>
-            <div class="company-field full-width">
-              <label>Объект НВОС</label>
-              <div class="field-value">Ирокинда (золотодобыча), код 03-0123-001234, I категория</div>
+            <div class="company-field"><label>ООО "Z-gold"</label></div>
+            <div class="company-field full-width"><label>Объект НВОС</label>
+              <div>Ирокинда (золотодобыча), I категория</div>
             </div>
           </div>
-          <button class="edit-company-btn" disabled>✎ Редактировать (в разработке)</button>
         </div>
       </section>
 
-      <!-- Форма добавления -->
+      <!-- Форма добавления отхода (упрощённая) -->
       <section class="section">
         <div class="section-header">
-          <h2>Новая запись</h2>
+          <h2>Новый отход</h2>
         </div>
 
-        <!-- Основная информация -->
-        <div class="form-grid">
+        <!-- Базовые поля (крупно) -->
+        <div class="form-basic">
           <div class="field">
-            <label>Наименование отхода *</label>
-            <input v-model="newWaste.waste_type" type="text" placeholder="Например: Лом черных металлов" />
+            <label>Что за отход?</label>
+            <input v-model="newWaste.waste_type" placeholder="Например: Лом черных металлов" />
           </div>
-          <div class="field">
-            <label>Код ФККО</label>
-            <input v-model="newWaste.fkko_code" type="text" placeholder="4 31 200 01 99 5" />
-          </div>
-          <div class="field">
-            <label>Класс опасности</label>
-            <select v-model="newWaste.hazard_class">
-              <option value="">—</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Дата образования</label>
-            <input v-model="newWaste.date" type="date" />
-          </div>
-          <div class="field">
-            <label>Место хранения</label>
-            <input v-model="newWaste.storage" type="text" placeholder="Площадка Ирокинда" />
-          </div>
-        </div>
-
-        <!-- Остатки на начало года -->
-        <div class="form-subsection">
-          <h3>📊 Остатки на начало года</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label>Хранение, тонн</label>
-              <input v-model.number="newWaste.start_storage" type="number" step="0.001" placeholder="0.000" />
+          <div class="field-row">
+            <div class="field half">
+              <label>Код ФККО</label>
+              <input v-model="newWaste.fkko_code" placeholder="4 31 200 01 99 5" />
             </div>
-            <div class="field">
-              <label>Накопление, тонн</label>
-              <input v-model.number="newWaste.start_accum" type="number" step="0.001" placeholder="0.000" />
+            <div class="field half">
+              <label>Класс</label>
+              <select v-model="newWaste.hazard_class">
+                <option value="">—</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field half">
+              <label>Дата</label>
+              <input v-model="newWaste.date" type="date" />
+            </div>
+            <div class="field half">
+              <label>Место</label>
+              <input v-model="newWaste.storage" placeholder="Площадка Ирокинда" />
             </div>
           </div>
         </div>
 
-        <!-- Движение отходов -->
-        <div class="form-subsection">
-          <h3>🔄 Движение отходов за отчётный период</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label>Образовано, тонн</label>
-              <input v-model.number="newWaste.generated" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Получено от других, тонн</label>
-              <input v-model.number="newWaste.received" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Обработано, тонн</label>
-              <input v-model.number="newWaste.processed" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Утилизировано, тонн</label>
-              <input v-model.number="newWaste.recycled" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Обезврежено, тонн</label>
-              <input v-model.number="newWaste.neutralized" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Передано другим, тонн</label>
-              <input v-model.number="newWaste.transferred" type="number" step="0.001" placeholder="0.000" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Размещение -->
-        <div class="form-subsection">
-          <h3>🏭 Размещено на эксплуатируемых объектах</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label>Всего, тонн</label>
-              <input v-model.number="newWaste.placed_total" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Хранение, тонн</label>
-              <input v-model.number="newWaste.placed_storage" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Захоронение, тонн</label>
-              <input v-model.number="newWaste.placed_disposal" type="number" step="0.001" placeholder="0.000" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Остатки на конец года -->
-        <div class="form-subsection">
-          <h3>📉 Остатки на конец года</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label>Хранение, тонн</label>
-              <input v-model.number="newWaste.end_storage" type="number" step="0.001" placeholder="0.000" />
-            </div>
-            <div class="field">
-              <label>Накопление, тонн</label>
-              <input v-model.number="newWaste.end_accum" type="number" step="0.001" placeholder="0.000" />
+        <!-- Движение отходов (с чекбоксами для показа/скрытия) -->
+        <div class="toggle-section" v-for="section in wasteSections" :key="section.key">
+          <label class="toggle-label" @click="toggleSection(section.key)">
+            <span class="toggle-icon">{{ sectionVisible[section.key] ? '▼' : '▶' }}</span>
+            {{ section.title }}
+          </label>
+          <div v-if="sectionVisible[section.key]" class="toggle-content">
+            <div class="form-grid">
+              <div class="field" v-for="field in section.fields" :key="field.model">
+                <label>{{ field.label }}</label>
+                <input v-model.number="newWaste[field.model]" type="number" step="0.001" placeholder="0.000" />
+              </div>
             </div>
           </div>
         </div>
 
         <div class="form-actions">
           <button @click="addWaste" class="btn-primary">💾 Сохранить</button>
-          <button @click="resetForm" class="btn-secondary">Очистить форму</button>
+          <button @click="resetForm" class="btn-secondary">Очистить</button>
         </div>
       </section>
 
-      <!-- Фильтры -->
+      <!-- Фильтры и таблица (упрощённо) -->
       <section class="section">
         <div class="filter-bar">
-          <div class="filter-group">
-            <label>Год</label>
-            <select v-model="filterYear">
-              <option :value="null">Все</option>
-              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Класс</label>
-            <select v-model="filterClass">
-              <option :value="null">Все</option>
-              <option value="I">1</option>
-              <option value="II">2</option>
-              <option value="III">3</option>
-              <option value="IV">4</option>
-              <option value="V">5</option>
-            </select>
-          </div>
-          <div class="stats">
-            <span>{{ filteredWastes.length }} записей</span>
-            <span>{{ totalVolume.toFixed(3) }} т</span>
-          </div>
+          <select v-model="filterYear">
+            <option :value="null">Все годы</option>
+            <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
+          </select>
+          <select v-model="filterClass">
+            <option :value="null">Все классы</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <div class="stats">{{ filteredWastes.length }} записей, {{ totalVolume.toFixed(1) }} т</div>
           <button v-if="wastes.length" @click="clearAll" class="btn-outline">Очистить всё</button>
         </div>
-      </section>
 
-      <!-- Таблица -->
-      <section class="section">
         <div class="table-wrapper">
           <table v-if="filteredWastes.length" class="table">
             <thead>
               <tr>
                 <th>№</th>
-                <th>Наименование отхода</th>
+                <th>Отход</th>
                 <th>ФККО</th>
-                <th>Кл.</th>
+                <th>Кл</th>
                 <th>Образовано, т</th>
                 <th>Передано, т</th>
-                <th>Дата</th>
-                <th>Место</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(w, idx) in filteredWastes" :key="w.id">
-                <td class="num">{{ idx + 1 }}</td>
+                <td>{{ idx + 1 }}</td>
                 <td>{{ w.waste_type }}</td>
                 <td class="mono">{{ w.fkko_code || '—' }}</td>
-                <td class="center">{{ w.hazard_class || '—' }}</td>
-                <td class="center">{{ (w.generated || 0).toFixed(3) }}</td>
-                <td class="center">{{ (w.transferred || 0).toFixed(3) }}</td>
-                <td class="center">{{ w.date || '—' }}</td>
-                <td class="center">{{ w.storage || '—' }}</td>
-                <td class="actions">
-                  <button @click="deleteWaste(w.id)" class="btn-icon">✕</button>
-                </td>
+                <td>{{ w.hazard_class || '—' }}</td>
+                <td class="center">{{ (w.generated || 0).toFixed(1) }}</td>
+                <td class="center">{{ (w.transferred || 0).toFixed(1) }}</td>
+                <td><button @click="deleteWaste(w.id)" class="btn-icon">✕</button></td>
               </tr>
             </tbody>
           </table>
-          <div v-else class="empty">
-            <p>Нет данных. Добавьте первую запись.</p>
-          </div>
+          <div v-else class="empty">Нет данных. Добавьте первую запись.</div>
         </div>
       </section>
 
-      <!-- Отчёты -->
+      <!-- Отчёты (крупные кнопки) -->
       <section class="section">
         <div class="section-header">
-          <h2>Отчёты</h2>
+          <h2>📄 Отчёты</h2>
         </div>
         <div class="reports">
-          <button @click="generate2TPWaste" class="btn-report">2-ТП (отходы)</button>
-          <button @click="generate4OS" class="btn-report">4-ОС</button>
-          <button @click="generateClassSummary" class="btn-report">Сводка по классам</button>
+          <button @click="generate2TPWaste" class="btn-primary">2-ТП (отходы)</button>
         </div>
-        <p class="hint">Excel скачается автоматически</p>
       </section>
 
       <!-- Статус -->
       <div class="status">
-        <span>● Офлайн-режим</span>
+        <span>● Офлайн</span>
         <span>● Данные в браузере</span>
       </div>
     </main>
@@ -345,14 +237,169 @@ const totalVolume = computed(() => {
   return filteredWastes.value.reduce((s, w) => s + (w.generated || 0), 0);
 });
 
-// ========== CRUD ==========
+const sectionVisible = ref({
+  start: false,
+  move: false,
+  placed: false,
+  end: false
+});
+
+const wasteSections = [
+  {
+    key: 'start', title: 'Остатки на начало года', fields: [
+      { label: 'Хранение', model: 'start_storage' },
+      { label: 'Накопление', model: 'start_accum' }
+    ]
+  },
+  {
+    key: 'move', title: 'Движение отходов за период', fields: [
+      { label: 'Образовано', model: 'generated' },
+      { label: 'Получено от других', model: 'received' },
+      { label: 'Обработано', model: 'processed' },
+      { label: 'Утилизировано', model: 'recycled' },
+      { label: 'Обезврежено', model: 'neutralized' },
+      { label: 'Передано другим', model: 'transferred' }
+    ]
+  },
+  {
+    key: 'placed', title: 'Размещено на объектах', fields: [
+      { label: 'Всего', model: 'placed_total' },
+      { label: 'Хранение', model: 'placed_storage' },
+      { label: 'Захоронение', model: 'placed_disposal' }
+    ]
+  },
+  {
+    key: 'end', title: 'Остатки на конец года', fields: [
+      { label: 'Хранение', model: 'end_storage' },
+      { label: 'Накопление', model: 'end_accum' }
+    ]
+  }
+];
+
+function toggleSection(key) {
+  sectionVisible.value[key] = !sectionVisible.value[key];
+}
+
+
 function saveToLocalStorage() {
   localStorage.setItem('ecolog_wastes', JSON.stringify(wastes.value));
 }
 
 function loadFromLocalStorage() {
   const saved = localStorage.getItem('ecolog_wastes');
-  if (saved) wastes.value = JSON.parse(saved);
+  if (saved && JSON.parse(saved).length > 0) {
+    wastes.value = JSON.parse(saved);
+  } else {
+    // Тестовые записи (5 штук)
+    wastes.value = [
+      {
+        id: Date.now() + 1,
+        waste_type: 'Лом черных металлов (демо)',
+        fkko_code: '4 61 010 01 20 5',
+        hazard_class: '5',
+        date: '2026-01-15',
+        storage: 'Площадка Ирокинда',
+        start_storage: 2.5,
+        start_accum: 0,
+        generated: 12.3,
+        received: 0,
+        processed: 0,
+        recycled: 10.0,
+        neutralized: 0,
+        transferred: 8.2,
+        placed_total: 0,
+        placed_storage: 0,
+        placed_disposal: 0,
+        end_storage: 4.8,
+        end_accum: 0
+      },
+      {
+        id: Date.now() + 2,
+        waste_type: 'Масла моторные отработанные (демо)',
+        fkko_code: '4 06 150 01 31 3',
+        hazard_class: '3',
+        date: '2026-02-20',
+        storage: 'Склад ГСМ',
+        start_storage: 0.8,
+        start_accum: 0,
+        generated: 1.2,
+        received: 0,
+        processed: 0,
+        recycled: 0.5,
+        neutralized: 0,
+        transferred: 1.0,
+        placed_total: 0,
+        placed_storage: 0,
+        placed_disposal: 0,
+        end_storage: 0.5,
+        end_accum: 0
+      },
+      {
+        id: Date.now() + 3,
+        waste_type: 'Отходы зачистки нефтеналивных ёмкостей (демо)',
+        fkko_code: '9 19 100 01 33 4',
+        hazard_class: '4',
+        date: '2026-03-10',
+        storage: 'Центральный склад',
+        start_storage: 1.2,
+        start_accum: 0,
+        generated: 0.0,
+        received: 3.5,
+        processed: 0,
+        recycled: 0,
+        neutralized: 2.0,
+        transferred: 2.0,
+        placed_total: 0,
+        placed_storage: 0,
+        placed_disposal: 0,
+        end_storage: 0.7,
+        end_accum: 0
+      },
+      {
+        id: Date.now() + 4,
+        waste_type: 'Тара полиэтиленовая загрязнённая (демо)',
+        fkko_code: '4 38 121 11 24 5',
+        hazard_class: '5',
+        date: '2026-04-05',
+        storage: 'Склад тары',
+        start_storage: 0.3,
+        start_accum: 0,
+        generated: 0.8,
+        received: 0,
+        processed: 0,
+        recycled: 0.8,
+        neutralized: 0,
+        transferred: 0.3,
+        placed_total: 0,
+        placed_storage: 0,
+        placed_disposal: 0,
+        end_storage: 0,
+        end_accum: 0
+      },
+      {
+        id: Date.now() + 5,
+        waste_type: 'Осадок очистных сооружений (демо)',
+        fkko_code: '7 23 100 01 41 4',
+        hazard_class: '4',
+        date: '2026-05-01',
+        storage: 'Иловые карты',
+        start_storage: 15.0,
+        start_accum: 0,
+        generated: 3.2,
+        received: 0,
+        processed: 0,
+        recycled: 0,
+        neutralized: 0,
+        transferred: 2.5,
+        placed_total: 15.0,
+        placed_storage: 10.0,
+        placed_disposal: 5.0,
+        end_storage: 15.7,
+        end_accum: 0
+      }
+    ];
+    saveToLocalStorage(); // Сохраняем тестовые, чтобы при следующем запуске они уже были
+  }
 }
 
 function addWaste() {
