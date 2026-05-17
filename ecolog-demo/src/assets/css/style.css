@@ -109,6 +109,7 @@ body {
 }
 .icon {
   font-size: 22px;
+  width: 30px;
 }
 .btn__close {
   background: none;
@@ -314,6 +315,10 @@ select:focus {
   font-size: 16px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 .btn-save:active {
   transform: scale(0.98);
@@ -549,4 +554,41 @@ td {
   .header h1 {
     font-size: 18px;
   }
+}
+
+
+/* === ИСПРАВЛЕНИЕ ДАТЫ НА iOS === */
+
+/* 1. Глобальный сброс для всех инпутов на iOS */
+input, select, textarea {
+  -webkit-appearance: none; /* Убирает системный стиль Safari */
+  appearance: none;
+  border-radius: 8px; /* Возвращаем скругление, так как сброс его убирает */
+}
+
+/* 2. Специфично для поля даты */
+input[type="date"] {
+  font-family: inherit; /* Наследует шрифт от body */
+  font-size: 16px; /* Фиксируем размер, чтобы не было зума при фокусе */
+  line-height: 1.5;
+  color: #1e293b;
+  
+  /* Магия для выравнивания текста внутри date-инпута */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+}
+
+/* 3. Убираем стандартную иконку календаря Safari (серую), если она мешает, 
+   или стилизуем её. Обычно лучше оставить, но сделать аккуратной. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 4px;
+  margin-right: -4px; /* Чуть сдвигаем, чтобы не прилипала к краю */
+}
+
+/* 4. Если поле пустое, текст может быть серым (placeholder) - красим в цвет текста */
+input[type="date"]:invalid {
+  color: #1e293b;
 }

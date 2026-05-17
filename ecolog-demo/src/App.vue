@@ -11,7 +11,7 @@
       <!-- Офлайн-напоминалка -->
       <section v-if="showNotify" class="offline-warning">
         <div class="offline-content">
-          <span class="icon">⚠️</span>
+          <img class="icon" src="../public/icon/warning.svg" alt="Внимание">
           <div class="text">
             <strong>РАБОТАЕТ БЕЗ ИНТЕРНЕТА</strong>
             <span>1. Нажмите Поделиться → На экран «Домой»</span>
@@ -24,12 +24,12 @@
       <!-- ЭКРАН ВЫБОРА РОЛИ -->
       <div v-if="!role" class="role-selection">
         <div class="role-card" @click="setRole('worker')">
-          <div class="role-icon">👷</div>
+          <div class="role-icon"><img class="icon" src="../public/icon/worker.svg" alt="Рабочий"></div>
           <h3>Рабочий</h3>
           <p>Ввод данных, учёт движения</p>
         </div>
         <div class="role-card" @click="setRole('ecologist')">
-          <div class="role-icon">👨‍💼</div>
+          <div class="role-icon"> <img class="icon" src="../public/icon/ecologist.svg" alt="Эколог"></div>
           <h3>Эколог</h3>
           <p>Отчёты 2-ТП, выгрузка Excel</p>
         </div>
@@ -38,37 +38,6 @@
       <!-- ИНТЕРФЕЙС РАБОЧЕГО -->
       <div v-if="role === 'worker'" class="worker-mode">
         <button @click="role = null" class="btn-back">← Сменить роль</button>
-
-        <!-- Карточка предприятия -->
-        <section class="section company-card">
-          <div class="company-header" @click="showCompany = !showCompany">
-            <div class="company-title">
-              <span class="company-badge">ДЕМО</span>
-              <h2>Предприятие</h2>
-            </div>
-            <button class="btn-icon toggle-btn">{{ showCompany ? '▼' : '▶' }}</button>
-          </div>
-          <!-- Логика: если showCompany=true, показываем контент. Исправлено с !showCompany -->
-          <div v-if="showCompany" class="company-content">
-            <div class="company-grid">
-              <div class="company-field"><label>ИНН</label>
-                <div>0323123456</div>
-              </div>
-              <div class="company-field"><label>ОГРН</label>
-                <div>1020304050607</div>
-              </div>
-              <div class="company-field"><label>КПП</label>
-                <div>032301001</div>
-              </div>
-              <div class="company-field"><label>Наименование</label>
-                <div>ООО "Z-gold"</div>
-              </div>
-              <div class="company-field full-width"><label>Объект НВОС</label>
-                <div>Ирокинда (золотодобыча), I категория</div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         <!-- Форма добавления -->
         <section class="section">
@@ -127,7 +96,7 @@
           </div>
 
           <div class="form-actions">
-            <button @click="addWaste" class="btn-save">💾 Сохранить</button>
+            <button @click="addWaste" class="btn-save"><img class="icon" src="../public/icon/save.svg" alt="Сохранить">  Сохранить</button>
             <button @click="resetForm" class="btn-reset">Очистить</button>
           </div>
         </section>
@@ -136,7 +105,7 @@
         <section class="section">
           <div class="filter-bar">
             <select v-model="filterYear">
-              <option :value="null">Все годы</option>
+              <option :value="null">Все года</option>
               <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
             </select>
             <select v-model="filterClass">
@@ -185,20 +154,51 @@
       <div v-if="role === 'ecologist'" class="ecologist-mode">
         <button @click="role = null" class="btn-back">← Сменить роль</button>
 
+        <!-- Карточка предприятия -->
+        <section class="section company-card">
+          <div class="company-header" @click="showCompany = !showCompany">
+            <div class="company-title">
+              <span class="company-badge">ДЕМО</span>
+              <h2>Предприятие</h2>
+            </div>
+            <button class="btn-icon toggle-btn">{{ showCompany ? '▼' : '▶' }}</button>
+          </div>
+          <!-- Логика: если showCompany=true, показываем контент. Исправлено с !showCompany -->
+          <div v-if="showCompany" class="company-content">
+            <div class="company-grid">
+              <div class="company-field"><label>ИНН</label>
+                <div>0323123456</div>
+              </div>
+              <div class="company-field"><label>ОГРН</label>
+                <div>1020304050607</div>
+              </div>
+              <div class="company-field"><label>КПП</label>
+                <div>032301001</div>
+              </div>
+              <div class="company-field"><label>Наименование</label>
+                <div>ООО "Z-gold"</div>
+              </div>
+              <div class="company-field full-width"><label>Объект НВОС</label>
+                <div>Ирокинда (золотодобыча), I категория</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="section report-section">
           <div class="section-header">
-            <h2>📄 Отчёты</h2>
+            <h2>Отчёты</h2>
           </div>
           <div class="reports-grid">
             <button @click="generate2TPWaste" class="btn-report">
-              <span class="r-icon">📊</span>
+              <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
               <div class="r-text">
                 <strong>2-ТП (отходы)</strong>
                 <small>Скачать Excel (с формулами)</small>
               </div>
             </button>
             <button @click="clearAll" class="btn-report danger">
-              <span class="r-icon">🗑</span>
+              <span class="r-icon"><img class="icon" src="../public/icon/trash.svg" alt="Корзина"></span>
               <div class="r-text">
                 <strong>Сброс базы</strong>
                 <small>Удалить все записи</small>
@@ -208,7 +208,7 @@
         </section>
       </div>
 
-      <div class=" ">
+      <div class="status">
         <span>● Офлайн-режим</span>
         <span>● Данные в браузере</span>
       </div>
