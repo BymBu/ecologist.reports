@@ -96,7 +96,7 @@
           </div>
 
           <div class="form-actions">
-            <button @click="addWaste" class="btn-save">  Сохранить</button>
+            <button @click="addWaste" class="btn-save"> Сохранить</button>
             <button @click="resetForm" class="btn-reset">Очистить</button>
           </div>
         </section>
@@ -197,6 +197,13 @@
                 <small>Скачать Excel</small>
               </div>
             </button>
+            <button @click="generate4OS" class="btn-report">
+              <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
+              <div class="r-text">
+                <strong>4-ОС</strong>
+                <small>Скачать Excel</small>
+              </div>
+            </button>
             <button @click="clearAll" class="btn-report danger">
               <span class="r-icon"><img class="icon" src="../public/icon/trash.svg" alt="Корзина"></span>
               <div class="r-text">
@@ -207,7 +214,7 @@
           </div>
         </section>
 
-             <!-- Таблица и фильтры -->
+        <!-- Таблица и фильтры -->
         <section class="section">
           <div class="filter-bar">
             <select v-model="filterYear">
@@ -598,6 +605,171 @@ async function generate2TPWaste() {
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   saveAs(blob, `2-TP_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
+
+async function generate4OS() {
+  if (!wastes.value.length) return alert('Нет данных для формирования отчета 4-ОС');
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('4-ОС (Затраты)');
+
+  // --- НАСТРОЙКА КОЛОНОК ---
+  worksheet.columns = [
+    { width: 40 }, // A - Наименование
+    { width: 8 },  // B - № строки
+    { width: 10 }, // C - Всего текущие
+    { width: 10 }, // D - в т.ч. собств. средства
+    { width: 10 }, // E - Материальные
+    { width: 10 }, // F - Оплата труда
+    { width: 12 }, // G - Услуги природоохр.
+    { width: 12 }, // H - Кап. ремонт
+    { width: 12 }, // I - Выручка
+    { width: 12 }  // J - Амортизация
+  ];
+
+  // --- СТИЛИ ---
+  const borderStyle = { style: 'thin' };
+  const baseBorder = {
+    top: borderStyle, left: borderStyle, bottom: borderStyle, right: borderStyle
+  };
+  
+  const headerStyle = {
+    font: {  size: 9, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
+    border: baseBorder
+  };
+
+  const dataStyle = {
+    font: { size: 9, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'middle' },
+    border: baseBorder
+  };
+
+  // --- ЗАПОЛНЕНИЕ ШАПКИ ---
+
+  // Строка 1: Главный заголовок
+  const row1 = worksheet.addRow(['Выполнение работ по охране окружающей среды, тыс. рублей']);
+  row1.height = 25;
+  worksheet.mergeCells('A1:J1');
+  row1.getCell(1).style = { 
+    font: { bold: true, size: 12, name: 'Arial' }, 
+    alignment: { horizontal: 'center', vertical: 'middle' },
+    border: baseBorder
+  };
+
+  // Строка 2: Уровень "Для собственных нужд"
+  // A2 и B2 будут объединены с A3 и B3 соответственно.
+  // C2:F2 - "Для собственных нужд..."
+  // G2:J2 - пустые, но с границами, чтобы сохранить сетку
+  const row2 = worksheet.addRow([
+    'Наименование направлений природоохранной деятельности', // A2
+    '№ строки', // B2
+    'Для собственных нужд (кроме предоставления специализированных природоохранных услуг)', // C2
+    '', '', '', // D2, E2, F2 (часть слияния C2:F2)
+    '', '', '', '' // G2, H2, I2, J2 (пустые)
+  ]);
+  row2.height = 30;
+  worksheet.mergeCells('C2:J2'); // Объединяем C2, D2, E2, F2
+  
+  // Применяем стиль ко всей строке 2
+  row2.eachCell(cell => cell.style = headerStyle);
+
+  // Строка 3: Подзаголовки под "Для собственных нужд" и основные заголовки для G-J
+  const row3 = worksheet.addRow([
+    '', '', // A3, B3 (части слияния с A2, B2)
+    'Текущие (эксплуатационные) затраты за год', // C3 (будет объединен с D3)
+    '', // D3 (часть слияния с C3)
+    'Из гр. 3 состав текущих затрат по основным видам', // E3 (будет объединен с F3)
+    '', // F3 (часть слияния с E3)
+    'Оплата услуг природоохранного назначения', // G3 (будет объединен с G4)
+    'Затраты на капитальный ремонт основных фондов по охране окружающей среды', // H3 (будет объединен с H4)
+    'Выручка (поступления) от продажи побочной продукции', // I3 (будет объединен с I4)
+    'Амортизационные отчисления на восстановление основных фондов по охране окружающей среды' // J3 (будет объединен с J4)
+  ]);
+  row3.height = 50;
+
+  // Строка 4: Подзаголовки для C-F
+  const row4 = worksheet.addRow([
+    '', '', // A4, B4 (части слияния)
+    'всего', // C4
+    'из них за счет собственных средств', // D4
+    'материальные затраты', // E4
+    'затраты на оплату труда и отчисления на социальные нужды', // F4
+    '', '', '', '' // G4, H4, I4, J4 (части слияния с G3, H3, I3, J3)
+  ]);
+  row4.height = 90;
+
+  // СЛИЯНИЯ ШАПКИ
+
+  // A и B: Вертикальное слияние строк 2 и 3
+  worksheet.mergeCells('A2:A4');
+  worksheet.mergeCells('B2:B4');
+
+  // C и D: Горизонтальное слияние в строке 3 (над "всего" и "из них")
+  worksheet.mergeCells('C3:D3');
+
+  // E и F: Горизонтальное слияние в строке 3 (над "материальные" и "оплата труда")
+  worksheet.mergeCells('E3:F3');
+
+  // G, H, I, J: Вертикальное слияние строк 3 и 4
+  worksheet.mergeCells('G3:G4');
+  worksheet.mergeCells('H3:H4');
+  worksheet.mergeCells('I3:I4');
+  worksheet.mergeCells('J3:J4');
+
+  // Применяем стили к строкам 3 и 4
+  row3.eachCell(cell => cell.style = headerStyle);
+  row4.eachCell(cell => cell.style = headerStyle);
+
+  // Строка 5: Буквенная нумерация (А, Б, 1...)
+  const row5 = worksheet.addRow(['А', 'Б', '3', '4', '5', '6', '7', '8', '9', '10']);
+  row5.height = 20;
+  row5.eachCell(cell => cell.style = { ...headerStyle, font: { bold: false, size: 9 } });
+
+
+  // РАСЧЕТ ДАННЫХ 
+  let totalCosts = 0;
+  let airCosts = 0;
+  let waterCosts = 0;
+  let wasteCosts = 0;
+
+  wastes.value.forEach(w => {
+    const mass = w.generated || 0;
+    if (['1', '2'].includes(w.hazard_class)) airCosts += mass; 
+    else if (['3'].includes(w.hazard_class)) waterCosts += mass;
+    else wasteCosts += mass;
+    totalCosts += mass;
+  });
+
+  // ЗАПОЛНЕНИЕ СТРОК ДАННЫХ 
+  const addDataRow = (name, rowNum, valTotal, valOwn, valMat, valLabor, valServ, valCap, valRev, valAmort) => {
+    const row = worksheet.addRow([
+      name, rowNum, valTotal, valOwn, valMat, valLabor, valServ, valCap, valRev, valAmort
+    ]);
+    row.height = 25;
+    
+    // Стиль для первой ячейки (текст слева)
+    row.getCell(1).style = { ...dataStyle, alignment: { horizontal: 'left', vertical: 'middle', wrapText: true } };
+    // Стиль для номера строки
+    row.getCell(2).style = dataStyle;
+    
+    // Стиль для числовых данных
+    for (let i = 3; i <= 10; i++) {
+      row.getCell(i).style = { ...dataStyle, numFmt: '#,##0.00' };
+    }
+  };
+
+  addDataRow('Охрана окружающей среды - всего', '01', totalCosts, totalCosts, 0, 0, 0, 0, 0, 0);
+  addDataRow('в том числе:', '', '', '', '', '', '', '', '', ''); 
+  addDataRow('охрана атмосферного воздуха...', '02', airCosts, airCosts, 0, 0, 0, 0, 0, 0);
+  addDataRow('охрана водных ресурсов', '03', waterCosts, waterCosts, 0, 0, 0, 0, 0, 0);
+  addDataRow('обращение с отходами...', '04', wasteCosts, wasteCosts, 0, 0, 0, 0, 0, 0);
+
+  // --- СОХРАНЕНИЕ ---
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `4-OS_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
 
 onMounted(loadFromLocalStorage);
 </script>
