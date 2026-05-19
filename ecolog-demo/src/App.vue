@@ -96,7 +96,7 @@
           </div>
 
           <div class="form-actions">
-            <button @click="addWaste" class="btn-save"><img class="icon" src="../public/icon/save.svg" alt="Сохранить">  Сохранить</button>
+            <button @click="addWaste" class="btn-save">  Сохранить</button>
             <button @click="resetForm" class="btn-reset">Очистить</button>
           </div>
         </section>
@@ -194,7 +194,7 @@
               <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
               <div class="r-text">
                 <strong>2-ТП (отходы)</strong>
-                <small>Скачать Excel (с формулами)</small>
+                <small>Скачать Excel</small>
               </div>
             </button>
             <button @click="clearAll" class="btn-report danger">
@@ -206,12 +206,56 @@
             </button>
           </div>
         </section>
+
+             <!-- Таблица и фильтры -->
+        <section class="section">
+          <div class="filter-bar">
+            <select v-model="filterYear">
+              <option :value="null">Все года</option>
+              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
+            </select>
+            <select v-model="filterClass">
+              <option :value="null">Все классы</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <div class="stats">{{ filteredWastes.length }} зап., {{ totalVolume.toFixed(1) }} т</div>
+            <button v-if="wastes.length" @click="clearAll" class="btn-clear">Очистить всё</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table v-if="filteredWastes.length" class="table">
+              <thead>
+                <tr>
+                  <th>№</th>
+                  <th>Отход</th>
+                  <th>ФККО</th>
+                  <th>Кл</th>
+                  <th>Обр.</th>
+                  <th>Пер.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(w, idx) in filteredWastes" :key="w.id">
+                  <td>{{ idx + 1 }}</td>
+                  <td>{{ w.waste_type }}</td>
+                  <td class="mono">{{ w.fkko_code || '—' }}</td>
+                  <td>{{ w.hazard_class || '—' }}</td>
+                  <td class="center">{{ (w.generated || 0).toFixed(1) }}</td>
+                  <td class="center">{{ (w.transferred || 0).toFixed(1) }}</td>
+                  <td><button @click="deleteWaste(w.id)" class="btn-del">✕</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="empty">Нет данных. Добавьте первую запись.</div>
+          </div>
+        </section>
       </div>
 
-      <div class="status">
-        <span>● Офлайн-режим</span>
-        <span>● Данные в браузере</span>
-      </div>
     </main>
   </div>
 </template>
@@ -260,7 +304,7 @@ const filterClass = ref(null);
 // Конфигурация секций формы
 const sectionVisible = ref({
   start: false,
-  move: true, // Движение открыто по умолчанию
+  move: false,
   placed: false,
   end: false
 });
