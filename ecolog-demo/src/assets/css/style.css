@@ -7,7 +7,7 @@
 }
 
 body {
-  background-color: #f1f5f9; 
+  background-color: #f1f5f9;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
@@ -24,7 +24,7 @@ body {
 
 /* === 2. ШАПКА === */
 .header {
-  background: #212631; 
+  background: #212631;
   color: white;
   padding: 16px 0;
   text-align: center;
@@ -235,7 +235,7 @@ body {
 input,
 select {
   width: 100%;
-  padding: 12px; 
+  padding: 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 16px;
@@ -254,6 +254,32 @@ select:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 12px;
+  background: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background: #2563eb;
+  color: white;
+}
+
+.full-width {
+  grid-column: span 2;
 }
 
 /* Аккордеоны (Toggle Sections) */
@@ -501,7 +527,7 @@ td {
   color: #475569;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-left: 12px; 
+  margin-left: 12px;
   background: none;
 }
 
@@ -512,9 +538,6 @@ td {
 .toggle-btn:active {
   transform: scale(0.9);
 }
-
-
-
 
 @keyframes fadeIn {
   from {
@@ -556,11 +579,12 @@ td {
   }
 }
 
-
 /* === ИСПРАВЛЕНИЕ ДАТЫ НА iOS === */
 
 /* 1. Глобальный сброс для всех инпутов на iOS */
-input, select, textarea {
+input,
+select,
+textarea {
   -webkit-appearance: none; /* Убирает системный стиль Safari */
   appearance: none;
   border-radius: 8px; /* Возвращаем скругление, так как сброс его убирает */
@@ -572,11 +596,11 @@ input[type="date"] {
   font-size: 16px; /* Фиксируем размер, чтобы не было зума при фокусе */
   line-height: 1.5;
   color: #1e293b;
-  
+
   /* Магия для выравнивания текста внутри date-инпута */
   display: flex;
   align-items: center;
-  justify-content: flex-start; 
+  justify-content: flex-start;
 }
 
 /* 3. Убираем стандартную иконку календаря Safari (серую), если она мешает, 

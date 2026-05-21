@@ -185,82 +185,163 @@
           </div>
         </section>
 
-        <section class="section report-section">
-          <div class="section-header">
-            <h2>Отчёты</h2>
-          </div>
-          <div class="reports-grid">
-            <button @click="generate2TPWaste" class="btn-report">
-              <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
-              <div class="r-text">
-                <strong>2-ТП (отходы)</strong>
-                <small>Скачать Excel</small>
-              </div>
-            </button>
-            <button @click="generate4OS" class="btn-report">
-              <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
-              <div class="r-text">
-                <strong>4-ОС</strong>
-                <small>Скачать Excel</small>
-              </div>
-            </button>
-            <button @click="clearAll" class="btn-report danger">
-              <span class="r-icon"><img class="icon" src="../public/icon/trash.svg" alt="Корзина"></span>
-              <div class="r-text">
-                <strong>Сброс базы</strong>
-                <small>Удалить все записи</small>
-              </div>
-            </button>
-          </div>
-        </section>
+        <div class="tabs">
+          <button @click="activeTab = 'reports'" :class="{ active: activeTab === 'reports' }">Отчёты</button>
+          <button @click="activeTab = 'transfer'" :class="{ active: activeTab === 'transfer' }">ЖДО (передача
+            отходов)</button>
+          <button @click="activeTab = '4OS'" :class="{ active: activeTab === '4OS' }">4-ОС</button>
+        </div>
 
-        <!-- Таблица и фильтры -->
-        <section class="section">
-          <div class="filter-bar">
-            <select v-model="filterYear">
-              <option :value="null">Все года</option>
-              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
-            </select>
-            <select v-model="filterClass">
-              <option :value="null">Все классы</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-            <div class="stats">{{ filteredWastes.length }} зап., {{ totalVolume.toFixed(1) }} т</div>
-            <button v-if="wastes.length" @click="clearAll" class="btn-clear">Очистить всё</button>
-          </div>
+        <div v-if="activeTab === 'reports'">
+          <section class="section report-section">
+            <div class="section-header">
+              <h2>Отчёты</h2>
+            </div>
+            <div class="reports-grid">
+              <button @click="generate2TPWaste" class="btn-report">
+                <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
+                <div class="r-text">
+                  <strong>2-ТП (отходы)</strong>
+                  <small>Скачать Excel</small>
+                </div>
+              </button>
+              <button @click="generate4OS" class="btn-report">
+                <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
+                <div class="r-text">
+                  <strong>4-ОС</strong>
+                  <small>Скачать Excel</small>
+                </div>
+              </button>
+              <button @click="generateZDO" class="btn-report">
+                <span class="r-icon"> <img class="icon" src="../public/icon/report.svg" alt="Отчет"></span>
+                <div class="r-text">
+                  <strong>ЖДО (Передача отходов)</strong>
+                  <small>Скачать Excel</small>
+                </div>
+              </button>
+              <button @click="clearAll" class="btn-report danger">
+                <span class="r-icon"><img class="icon" src="../public/icon/trash.svg" alt="Корзина"></span>
+                <div class="r-text">
+                  <strong>Сброс базы</strong>
+                  <small>Удалить все записи</small>
+                </div>
+              </button>
+            </div>
+          </section>
+        </div>
+        <div v-if="activeTab === 'transfer'">
+          <section class="section">
+            <div class="section-header">
+              <h2>Передача отходов (ЖДО)</h2>
+            </div>
 
-          <div class="table-wrapper">
-            <table v-if="filteredWastes.length" class="table">
-              <thead>
-                <tr>
-                  <th>№</th>
-                  <th>Отход</th>
-                  <th>ФККО</th>
-                  <!-- <th>Кл</th>
-                  <th>Обр.</th>
-                  <th>Пер.</th> -->
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(w, idx) in filteredWastes" :key="w.id">
-                  <td>{{ idx + 1 }}</td>
-                  <td>{{ w.waste_type }}</td>
-                  <td class="mono">{{ w.fkko_code || '—' }}</td>
-                  <!-- <td>{{ w.hazard_class || '—' }}</td>
-                  <td class="center">{{ (w.generated || 0).toFixed(1) }}</td>
-                  <td class="center">{{ (w.transferred || 0).toFixed(1) }}</td> -->
-                  <td><button @click="deleteWaste(w.id)" class="btn-del">✕</button></td>
-                </tr>
-              </tbody>
-            </table>
-            <div v-else class="empty">Нет данных. Добавьте первую запись.</div>
-          </div>
-        </section>
+            <div class="form-grid">
+              <div class="field">
+                <label>Наименование отхода *</label>
+                <input v-model="newTransfer.waste_type" placeholder="Лом черных металлов" />
+              </div>
+              <div class="field">
+                <label>Код ФККО</label>
+                <input v-model="newTransfer.fkko_code" placeholder="4 61 010 01 20 5" />
+              </div>
+              <div class="field">
+                <label>Класс опасности</label>
+                <select v-model="newTransfer.hazard_class">
+                  <option value="">—</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-subsection">
+              <h3>Количество переданных отходов, тонн</h3>
+              <div class="form-grid">
+                <div class="field"><label>Всего</label><input v-model.number="newTransfer.amount_total" type="number"
+                    step="0.001" /></div>
+                <div class="field"><label>Для обработки</label><input v-model.number="newTransfer.amount_processing"
+                    type="number" step="0.001" /></div>
+                <div class="field"><label>Для утилизации</label><input v-model.number="newTransfer.amount_recycling"
+                    type="number" step="0.001" /></div>
+                <div class="field"><label>Для захоронения</label><input v-model.number="newTransfer.amount_disposal"
+                    type="number" step="0.001" /></div>
+                <div class="field"><label>Для хранения</label><input v-model.number="newTransfer.amount_storage"
+                    type="number" step="0.001" /></div>
+                <div class="field"><label>Для обезвреживания</label><input
+                    v-model.number="newTransfer.amount_neutralization" type="number" step="0.001" /></div>
+              </div>
+            </div>
+
+            <div class="form-subsection">
+              <h3>Сведения о лицах, которым переданы отходы</h3>
+              <div class="form-grid">
+                <div class="field"><label>Контрагент</label><input v-model="newTransfer.contractor"
+                    placeholder="ООО «Эко-Сервис»" /></div>
+                <div class="field"><label>Дата договора</label><input v-model="newTransfer.contract_date" type="date" />
+                </div>
+                <div class="field"><label>Номер договора</label><input v-model="newTransfer.contract_number"
+                    placeholder="№12 от 15.03.2026" /></div>
+                <div class="field"><label>Срок действия договора</label><input v-model="newTransfer.contract_validity"
+                    placeholder="до 31.12.2026" /></div>
+                <div class="field full-width"><label>Реквизиты лицензии</label><input
+                    v-model="newTransfer.license_details" placeholder="Серия, номер, кем выдана" /></div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button @click="addTransfer" class="btn-save">Сохранить передачу</button>
+              <button @click="resetTransferForm" class="btn-reset">Очистить</button>
+            </div>
+          </section>
+
+          <!-- Таблица переданных отходов -->
+          <section class="section">
+            <div class="section-header">
+              <h2>Журнал передач</h2>
+            </div>
+            <div class="table-wrapper">
+              <table v-if="transfers.length" class="table">
+                <thead>
+                  <tr>
+                    <th>Отход</th>
+                    <th>ФККО</th>
+                    <th>Кл</th>
+                    <th>Всего, т</th>
+                    <th>Контрагент</th>
+                    <th>Дата договора</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="t in transfers" :key="t.id">
+                    <td>{{ t.waste_type }}</td>
+                    <td class="mono">{{ t.fkko_code || '—' }}</td>
+                    <td>{{ t.hazard_class || '—' }}</td>
+                    <td class="num">{{ (t.amount_total || 0).toFixed(3) }}</td>
+                    <td>{{ t.contractor || '—' }}</td>
+                    <td>{{ t.contract_date || '—' }}</td>
+                    <td><button @click="deleteTransfer(t.id)" class="btn-del">✕</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-else class="empty">Нет данных о передаче отходов</div>
+            </div>
+          </section>
+        </div>
+
+        <div v-if="activeTab === '4OS'">
+          <section class="section">
+            <div class="demo-placeholder">
+              <h3>Демо-режим</h3>
+              <p>В данный момент используется тестовая база данных по затратам.</p>
+              <p>Функционал ручного ввода затрат будет добавлен в следующих обновлениях.</p>
+              <p>Вы можете сгенерировать отчет 4-ОС на вкладке отчеты</p>
+            </div>
+          </section>
+        </div>
       </div>
 
     </main>
@@ -276,9 +357,144 @@ import { saveAs } from 'file-saver';
 const showNotify = ref(true);
 const showCompany = ref(false); // По умолчанию скрыто, чтобы не занимать место
 const role = ref(null); // 'worker', 'ecologist' или null
+const activeTab = ref('reports')
 
 function setRole(r) {
   role.value = r;
+}
+// ========== ЖДО (передача отходов) ==========
+const transfers = ref([]);
+const newTransfer = ref({
+  waste_type: '',
+  fkko_code: '',
+  hazard_class: '',
+  amount_total: 0,
+  amount_processing: 0,
+  amount_recycling: 0,
+  amount_disposal: 0,
+  amount_storage: 0,
+  amount_neutralization: 0,
+  contractor: '',
+  contract_date: '',
+  contract_number: '',
+  contract_validity: '',
+  license_details: ''
+});
+
+// Загрузка/сохранение передач
+function loadTransfersFromLocal() {
+  const saved = localStorage.getItem('ecolog_transfers');
+  if (saved) {
+    transfers.value = JSON.parse(saved);
+  } else {
+    // Если данных нет — создаем тестовые
+    initDemoTransfers();
+  }
+}
+
+function saveTransfersToLocal() {
+  localStorage.setItem('ecolog_transfers', JSON.stringify(transfers.value));
+}
+
+// Функция для создания демо-данных ЖДО
+function initDemoTransfers() {
+  transfers.value = [
+    {
+      id: Date.now() + 100,
+      waste_type: 'Лом черных металлов (демо)',
+      fkko_code: '4 61 010 01 20 5',
+      hazard_class: '5',
+      amount_total: 8.200,
+      amount_processing: 0,
+      amount_recycling: 8.200, // Утилизация (переплавка)
+      amount_disposal: 0,
+      amount_storage: 0,
+      amount_neutralization: 0,
+      contractor: 'ООО "Металл-Рециклинг"',
+      contract_date: '2026-01-10',
+      contract_number: '№ 15-УТ',
+      contract_validity: 'до 31.12.2027',
+      license_details: 'Серия АА № 123456 от 01.01.2020'
+    },
+    {
+      id: Date.now() + 101,
+      waste_type: 'Масла моторные отработанные (демо)',
+      fkko_code: '4 06 150 01 31 3',
+      hazard_class: '3',
+      amount_total: 1.000,
+      amount_processing: 1.000, // Обработка (регенерация)
+      amount_recycling: 0,
+      amount_disposal: 0,
+      amount_storage: 0,
+      amount_neutralization: 0,
+      contractor: 'ЗАО "Эко-Нефть"',
+      contract_date: '2026-02-15',
+      contract_number: '№ 44/ОБ',
+      contract_validity: 'до 31.12.2026',
+      license_details: 'Серия ББ № 789012 от 15.05.2021'
+    },
+    {
+      id: Date.now() + 102,
+      waste_type: 'Отходы зачистки ёмкостей (демо)',
+      fkko_code: '9 19 100 01 33 4',
+      hazard_class: '4',
+      amount_total: 2.000,
+      amount_processing: 0,
+      amount_recycling: 0,
+      amount_disposal: 0,
+      amount_storage: 0,
+      amount_neutralization: 2.000, // Обезвреживание
+      contractor: 'МУП "Городские Чистота"',
+      contract_date: '2026-03-01',
+      contract_number: '№ 102-ОБ',
+      contract_validity: 'до 31.12.2026',
+      license_details: 'Серия ВВ № 345678 от 10.10.2019'
+    }
+  ];
+  saveTransfersToLocal();
+}
+
+function addTransfer() {
+  if (!newTransfer.value.waste_type) {
+    alert('Заполните наименование отхода');
+    return;
+  }
+  transfers.value.push({
+    id: Date.now(),
+    ...newTransfer.value,
+    amount_total: Number(newTransfer.value.amount_total) || 0,
+    amount_processing: Number(newTransfer.value.amount_processing) || 0,
+    amount_recycling: Number(newTransfer.value.amount_recycling) || 0,
+    amount_disposal: Number(newTransfer.value.amount_disposal) || 0,
+    amount_storage: Number(newTransfer.value.amount_storage) || 0,
+    amount_neutralization: Number(newTransfer.value.amount_neutralization) || 0
+  });
+  saveTransfersToLocal();
+  resetTransferForm();
+}
+
+function resetTransferForm() {
+  newTransfer.value = {
+    waste_type: '',
+    fkko_code: '',
+    hazard_class: '',
+    amount_total: 0,
+    amount_processing: 0,
+    amount_recycling: 0,
+    amount_disposal: 0,
+    amount_storage: 0,
+    amount_neutralization: 0,
+    contractor: '',
+    contract_date: '',
+    contract_number: '',
+    contract_validity: '',
+    license_details: ''
+  };
+}
+
+function deleteTransfer(id) {
+  transfers.value = transfers.value.filter(t => t.id !== id);
+  saveTransfersToLocal();
 }
 
 const wastes = ref([]);
@@ -631,9 +847,9 @@ async function generate4OS() {
   const baseBorder = {
     top: borderStyle, left: borderStyle, bottom: borderStyle, right: borderStyle
   };
-  
+
   const headerStyle = {
-    font: {  size: 9, name: 'Arial' },
+    font: { size: 9, name: 'Arial' },
     alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
     border: baseBorder
   };
@@ -650,8 +866,8 @@ async function generate4OS() {
   const row1 = worksheet.addRow(['Выполнение работ по охране окружающей среды, тыс. рублей']);
   row1.height = 25;
   worksheet.mergeCells('A1:J1');
-  row1.getCell(1).style = { 
-    font: { bold: true, size: 12, name: 'Arial' }, 
+  row1.getCell(1).style = {
+    font: { bold: true, size: 12, name: 'Arial' },
     alignment: { horizontal: 'center', vertical: 'middle' },
     border: baseBorder
   };
@@ -669,7 +885,7 @@ async function generate4OS() {
   ]);
   row2.height = 30;
   worksheet.mergeCells('C2:J2'); // Объединяем C2, D2, E2, F2, J2
-  
+
   // Применяем стиль ко всей строке 2
   row2.eachCell(cell => cell.style = headerStyle);
 
@@ -734,7 +950,7 @@ async function generate4OS() {
 
   wastes.value.forEach(w => {
     const mass = w.generated || 0;
-    if (['1', '2'].includes(w.hazard_class)) airCosts += mass; 
+    if (['1', '2'].includes(w.hazard_class)) airCosts += mass;
     else if (['3'].includes(w.hazard_class)) waterCosts += mass;
     else wasteCosts += mass;
     totalCosts += mass;
@@ -746,12 +962,12 @@ async function generate4OS() {
       name, rowNum, valTotal, valOwn, valMat, valLabor, valServ, valCap, valRev, valAmort
     ]);
     row.height = 25;
-    
+
     // Стиль для первой ячейки (текст слева)
     row.getCell(1).style = { ...dataStyle, alignment: { horizontal: 'left', vertical: 'middle', wrapText: true } };
     // Стиль для номера строки
     row.getCell(2).style = dataStyle;
-    
+
     // Стиль для числовых данных
     for (let i = 3; i <= 10; i++) {
       row.getCell(i).style = { ...dataStyle, numFmt: '#,##0.00' };
@@ -759,7 +975,7 @@ async function generate4OS() {
   };
 
   addDataRow('Охрана окружающей среды - всего', '01', totalCosts, totalCosts, 0, 0, 0, 0, 0, 0);
-  addDataRow('в том числе:', '', '', '', '', '', '', '', '', ''); 
+  addDataRow('в том числе:', '', '', '', '', '', '', '', '', '');
   addDataRow('охрана атмосферного воздуха...', '02', airCosts, airCosts, 0, 0, 0, 0, 0, 0);
   addDataRow('охрана водных ресурсов', '03', waterCosts, waterCosts, 0, 0, 0, 0, 0, 0);
   addDataRow('обращение с отходами...', '04', wasteCosts, wasteCosts, 0, 0, 0, 0, 0, 0);
@@ -770,8 +986,195 @@ async function generate4OS() {
   saveAs(blob, `4-OS_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
+async function generateZDO() {
+  if (!transfers.value.length) return alert('Нет данных о передачах отходов');
 
-onMounted(loadFromLocalStorage);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('ЖДО (Передача)');
+
+  // --- НАСТРОЙКА КОЛОНОК (14 штук) ---
+  worksheet.columns = [
+    { width: 5 },  // A: № п/п
+    { width: 20 }, // B: Наименование
+    { width: 12 }, // C: Код ФККО
+    { width: 15 },  // D: Класс
+    { width: 6 }, // E - Всего
+    { width: 6 }, // F - Обработка
+    { width: 6 }, // G - Утилизация
+    { width: 6 }, // H - Обезвреживание
+    { width: 6 }, // I - Хранение
+    { width: 6 }, // J - Захоронение
+    { width: 13 }, // K - Лица
+    { width: 13 }, // L - Договор
+    { width: 13 }, // M - Срок
+    { width: 20 }  // N - Лицензия
+  ];
+
+  // --- СТИЛИ ---
+  const borderStyle = { style: 'thin' };
+  const baseBorder = {
+    top: borderStyle, left: borderStyle, bottom: borderStyle, right: borderStyle
+  };
+
+  const headerStyle = {
+    font: { size: 9, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'top', wrapText: true },
+    border: baseBorder
+  };
+
+  // Стиль для вертикального текста (подзаголовки количества)
+  const verticalHeaderStyle = {
+    font: { size: 9, name: 'Arial' },
+    alignment: {
+      horizontal: 'center',
+      vertical: 'middle',
+      wrapText: true,
+      textRotation: 90
+    },
+    border: baseBorder
+  };
+
+  const dataStyle = {
+    font: { size: 9, name: 'Arial' },
+    alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
+    border: baseBorder
+  };
+
+  const numStyle = {
+    ...dataStyle,
+    numFmt: '#,##0.000' // Три знака после запятой для тонн
+  };
+
+  // --- ШАПКА (Строка 1) ---
+  const row1 = worksheet.addRow([
+    '№ п/п',
+    'Наименование вида отхода',
+    'Код по ФККО',
+    'Класс опасности вида отхода',
+    'Количество переданных отходов за отчетный период, тонн', // E (объединит E-J)
+    '', '', '', '', '', // F-J пустые
+    'Сведения о лицах, которым переданы отходы', // K
+    'Дата и номер договора на передачу отходов', // L
+    'Срок действия договора', // M
+    'Реквизиты лицензии на осуществление деятельности по сбору, транспортированию, обработке, утилизации, обезвреживанию, размещению отходов I - IV классов опасности' // N
+  ]);
+  row1.height = 60;
+
+  // --- ШАПКА (Строка 2) ---
+  const row2 = worksheet.addRow([
+    '', '', '', '', // A-D пустые (часть слияния)
+    'всего', // E
+    'для обработки', // F
+    'для утилизации', // G
+    'для обезвреживания', // H
+    'для хранения', // I
+    'для захоронения', // J
+    '', '', '', '' // K-N пустые (часть слияния)
+  ]);
+  row2.height = 80;
+
+  // --- ШАПКА (Строка 3) ---
+  const row3 = worksheet.addRow(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14']);
+  row3.height = 20;
+
+  // --- СЛИЯНИЯ ШАПКИ ---
+  // Вертикальные (A-D, K-N) занимают строки 1 и 2
+  worksheet.mergeCells('A1:A2');
+  worksheet.mergeCells('B1:B2');
+  worksheet.mergeCells('C1:C2');
+  worksheet.mergeCells('D1:D2');
+
+  worksheet.mergeCells('K1:K2');
+  worksheet.mergeCells('L1:L2');
+  worksheet.mergeCells('M1:M2');
+  worksheet.mergeCells('N1:N2');
+
+  // Горизонтальное (E-J) в строке 1
+  worksheet.mergeCells('E1:J1');
+
+  // Применяем стили ко всем строкам шапки
+  row1.eachCell(cell => cell.style = headerStyle);
+
+  // Для второй строки применяем вертикальный стиль только к колонкам E-J
+  row2.eachCell((cell, colNumber) => {
+    if (colNumber >= 5 && colNumber <= 10) {
+      cell.style = verticalHeaderStyle;
+    } else {
+      cell.style = headerStyle;
+    }
+  });
+
+  row3.eachCell(cell => cell.style = { ...headerStyle, font: { bold: false, size: 9 } });
+
+  // --- ДАННЫЕ ---
+  transfers.value.forEach((t, idx) => {
+    const row = worksheet.addRow([]);
+    row.height = 50;
+
+    // 1. № п/п
+    row.getCell(1).value = idx + 1;
+    row.getCell(1).style = dataStyle;
+
+    // 2. Наименование
+    row.getCell(2).value = t.waste_type;
+    row.getCell(2).style = { ...dataStyle, alignment: { horizontal: 'left', vertical: 'middle', wrapText: true } };
+
+    // 3. Код ФККО
+    row.getCell(3).value = t.fkko_code || '';
+    row.getCell(3).style = dataStyle;
+
+    // 4. Класс опасности
+    row.getCell(4).value = t.hazard_class || '';
+    row.getCell(4).style = dataStyle;
+
+    // 5-10. Числовые данные (Количество)
+    const amounts = [
+      t.amount_total,
+      t.amount_processing,
+      t.amount_recycling,
+      t.amount_neutralization,
+      t.amount_storage,
+      t.amount_disposal
+    ];
+
+    for (let i = 0; i < amounts.length; i++) {
+      const cellIndex = i + 5; // Начинаем с колонки E (индекс 5)
+      const cell = row.getCell(cellIndex);
+      cell.value = Number(amounts[i]) || 0;
+      cell.style = numStyle;
+    }
+
+    // 11. Сведения о лицах (Контрагент)
+    row.getCell(11).value = t.contractor || '';
+    row.getCell(11).style = { ...dataStyle, alignment: { horizontal: 'left', vertical: 'middle', wrapText: true } };
+
+    // 12. Дата и номер договора
+    let contractInfo = '';
+    if (t.contract_date) contractInfo += t.contract_date + '\n';
+    if (t.contract_number) contractInfo += t.contract_number;
+    row.getCell(12).value = contractInfo.trim() || '';
+    row.getCell(12).style = { ...dataStyle, alignment: { horizontal: 'center', vertical: 'middle', wrapText: true } };
+
+    // 13. Срок действия договора
+    row.getCell(13).value = t.contract_validity || '';
+    row.getCell(13).style = dataStyle;
+
+    // 14. Реквизиты лицензии
+    row.getCell(14).value = t.license_details || '';
+    row.getCell(14).style = { ...dataStyle, alignment: { horizontal: 'left', vertical: 'middle', wrapText: true } };
+  });
+
+  // --- СОХРАНЕНИЕ ---
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `ZDO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+
+onMounted(() => {
+  loadFromLocalStorage();
+  loadTransfersFromLocal();
+});
 </script>
 
 <style></style>
