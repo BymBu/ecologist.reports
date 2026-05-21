@@ -381,7 +381,7 @@ select:focus {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 500px;
+  min-width: 200px;
 }
 
 th {
