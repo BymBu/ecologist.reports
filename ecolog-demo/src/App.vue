@@ -127,9 +127,9 @@
                   <th>№</th>
                   <th>Отход</th>
                   <th>ФККО</th>
-                  <th>Кл</th>
+                  <!-- <th>Кл</th>
                   <th>Обр.</th>
-                  <th>Пер.</th>
+                  <th>Пер.</th> -->
                   <th></th>
                 </tr>
               </thead>
@@ -138,9 +138,9 @@
                   <td>{{ idx + 1 }}</td>
                   <td>{{ w.waste_type }}</td>
                   <td class="mono">{{ w.fkko_code || '—' }}</td>
-                  <td>{{ w.hazard_class || '—' }}</td>
+                  <!-- <td>{{ w.hazard_class || '—' }}</td>
                   <td class="center">{{ (w.generated || 0).toFixed(1) }}</td>
-                  <td class="center">{{ (w.transferred || 0).toFixed(1) }}</td>
+                  <td class="center">{{ (w.transferred || 0).toFixed(1) }}</td> -->
                   <td><button @click="deleteWaste(w.id)" class="btn-del">✕</button></td>
                 </tr>
               </tbody>
