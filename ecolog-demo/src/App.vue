@@ -50,13 +50,14 @@
             <!-- ПОЛЕ 1: НАИМЕНОВАНИЕ -->
             <div class="field autocomplete-container">
               <label>Что за отход?</label>
-              <input v-model="newWaste.waste_type" placeholder="Начните вводить название..." @input="handleNameInput"
-                @focus="showNameSuggestions = true" @blur="onNameBlur" autocomplete="off" />
+              <input ref="wasteNameInput" v-model="newWaste.waste_type" placeholder="Начните вводить название..."
+                @input="handleNameInput($event)" @focus="showNameSuggestions = true" autocomplete="off"
+                autocorrect="off" autocapitalize="off" spellcheck="false" />
 
-              <!-- Кастомный список подсказок для Названия -->
+              <!-- Список подсказок -->
               <ul v-if="showNameSuggestions && nameSuggestions.length > 0" class="autocomplete-list">
                 <li v-for="(item, index) in nameSuggestions" :key="index"
-                  @mousedown.prevent="selectNameSuggestion(item)"> <!-- ВАЖНО: mousedown.prevent -->
+                  @mousedown.prevent="selectNameSuggestion(item)" @touchstart.prevent="selectNameSuggestion(item)">
                   {{ item.name }} <span class="code-hint">({{ item.code }})</span>
                 </li>
               </ul>
@@ -265,14 +266,16 @@
               <!-- ПОЛЕ 1: НАИМЕНОВАНИЕ (ЖДО) -->
               <div class="field autocomplete-container">
                 <label>Что за отход?</label>
-                <input v-model="newTransfer.waste_type" placeholder="Начните вводить название..."
-                  @input="handleTransferNameInput" @focus="showTransferNameSuggestions = true"
-                  @blur="onTransferNameBlur" autocomplete="off" />
+                <input ref="transferNameInput" v-model="newTransfer.waste_type"
+                  placeholder="Начните вводить название..." @input="handleTransferNameInput($event)"
+                  @focus="showTransferNameSuggestions = true" autocomplete="off" autocorrect="off" autocapitalize="off"
+                  spellcheck="false" />
 
                 <!-- Список подсказок для ЖДО (Название) -->
                 <ul v-if="showTransferNameSuggestions && transferNameSuggestions.length > 0" class="autocomplete-list">
                   <li v-for="(item, index) in transferNameSuggestions" :key="'t-name-' + index"
-                    @mousedown.prevent="selectTransferNameSuggestion(item)">
+                    @mousedown.prevent="selectTransferNameSuggestion(item)"
+                    @touchstart.prevent="selectTransferNameSuggestion(item)">
                     {{ item.name }} <span class="code-hint">({{ item.code }})</span>
                   </li>
                 </ul>
@@ -282,15 +285,16 @@
                 <!-- ПОЛЕ 2: КОД ФККО (ЖДО) -->
                 <div class="field autocomplete-container">
                   <label>Код ФККО</label>
-                  <input v-model="newTransfer.fkko_code" placeholder="Введите код (например 4 61...)"
-                    @input="handleTransferCodeInput" @focus="showTransferCodeSuggestions = true"
-                    @blur="onTransferCodeBlur" autocomplete="off" />
+                  <input ref="transferCodeInput" v-model="newTransfer.fkko_code"
+                    placeholder="Введите код (например 4 61...)" @input="handleTransferCodeInput"
+                    @focus="showTransferCodeSuggestions = true" autocomplete="off" />
 
                   <!-- Список подсказок для ЖДО (Код) -->
                   <ul v-if="showTransferCodeSuggestions && transferCodeSuggestions.length > 0"
                     class="autocomplete-list">
                     <li v-for="(item, index) in transferCodeSuggestions" :key="'t-code-' + index"
-                      @mousedown.prevent="selectTransferCodeSuggestion(item)">
+                      @mousedown.prevent="selectTransferCodeSuggestion(item)"
+                      @touchstart.prevent="selectTransferCodeSuggestion(item)">
                       {{ item.code }} <span class="name-hint">- {{ item.name }}</span>
                     </li>
                   </ul>
@@ -403,7 +407,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
@@ -1228,55 +1232,96 @@ async function generateZDO() {
 onMounted(() => {
   loadFromLocalStorage();
   loadTransfersFromLocal();
+
+  document.addEventListener('click', handleClickOutside);
+  document.addEventListener('touchstart', handleClickOutside);
 });
 
 // ========== ЛОГИКА АВТОКОМПЛИТА (ОСНОВНАЯ ФОРМА) ==========
 
 const showNameSuggestions = ref(false);
 const showCodeSuggestions = ref(false);
+const wasteNameInput = ref(null);
 
 // --- НАИМЕНОВАНИЕ ---
 
 const nameSuggestions = computed(() => {
-  const query = newWaste.value.waste_type.toLowerCase().trim();
+  // Берем значение напрямую из объекта, но фильтруем аккуратно
+  const rawVal = newWaste.value.waste_type;
+  if (!rawVal) return [];
+
+  const query = rawVal.toLowerCase().trim();
   if (!query) return [];
+
   return FKKO_DB.filter(item => item.name.toLowerCase().startsWith(query)).slice(0, 10);
 });
 
-function handleNameInput() {
-  // Всегда показываем список при вводе, если есть что показать
+function handleNameInput(event) {
+  // 1. Принудительно открываем список
   showNameSuggestions.value = true;
 
-  const val = newWaste.value.waste_type;
-  if (!val.trim()) {
+  // 2. Получаем значение ИЗ СОБЫТИЯ (это надежнее чем v-model на Android при наборе)
+  const val = event.target.value;
+
+  // 3. Обновляем модель вручную
+  newWaste.value.waste_type = val;
+
+  if (!val || !val.trim()) {
     newWaste.value.fkko_code = '';
     newWaste.value.hazard_class = '';
     showNameSuggestions.value = false;
     return;
   }
 
+  // 4. Логика поиска
   const exactMatch = FKKO_DB.find(item => item.name.toLowerCase() === val.toLowerCase());
+
   if (exactMatch) {
     newWaste.value.fkko_code = exactMatch.code;
     newWaste.value.hazard_class = exactMatch.class;
   } else {
-    // Сбрасываем код и класс, если точного совпадения нет, 
-    // чтобы пользователь не отправил мусор
+    // Если нет точного совпадения, сбрасываем код, но список оставляем
     newWaste.value.fkko_code = '';
     newWaste.value.hazard_class = '';
   }
 }
 
-function selectNameSuggestion(item) {
+async function selectNameSuggestion(item) {
+  // 1. Обновляем данные
   newWaste.value.waste_type = item.name;
   newWaste.value.fkko_code = item.code;
   newWaste.value.hazard_class = item.class;
+
+  // 2. Жестко ставим значение в DOM (Android Fix)
+  if (wasteNameInput.value) {
+    wasteNameInput.value.value = item.name;
+    // Генерируем событие input, чтобы Vue обновил свой v-model
+    wasteNameInput.value.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // 3. Закрываем список
   showNameSuggestions.value = false;
+
+  // 4. Возвращаем фокус
+  await nextTick();
+  if (wasteNameInput.value) {
+    wasteNameInput.value.focus();
+  }
 }
 
-function onNameBlur() {
-  setTimeout(() => { showNameSuggestions.value = false; }, 150);
+// === ГЛОБАЛЬНОЕ ЗАКРЫТИЕ СПИСКА (Вместо blur) ===
+function handleClickOutside(event) {
+  // Если клик был НЕ внутри нашего контейнера автокомплита
+  if (!event.target.closest('.autocomplete-container')) {
+    showNameSuggestions.value = false;
+  }
 }
+
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener('touchstart', handleClickOutside);
+});
 
 
 // --- КОД ФККО ---
@@ -1684,65 +1729,56 @@ const FKKO_DB = [
 
 // === ЛОГИКА АВТОКОМПЛИТА ДЛЯ ЖДО (TRANSFER) ===
 
-// Состояние видимости списков для ЖДО
+// Ссылки на инпуты ЖДО
+const transferNameInput = ref(null);
+const transferCodeInput = ref(null);
+
 const showTransferNameSuggestions = ref(false);
 const showTransferCodeSuggestions = ref(false);
-
-// Убрали таймеры. Они не нужны, если использовать prevent на mousedown
 
 // === ФИЛЬТРАЦИЯ НАЗВАНИЙ ДЛЯ ЖДО ===
 const transferNameSuggestions = computed(() => {
   const query = newTransfer.value.waste_type.toLowerCase().trim();
   if (!query) return [];
-
-  return FKKO_DB.filter(item =>
-    item.name.toLowerCase().startsWith(query)
-  ).slice(0, 10);
+  return FKKO_DB.filter(item => item.name.toLowerCase().startsWith(query)).slice(0, 10);
 });
 
-function handleTransferNameInput() {
-  // При любом вводе мы ХОТИМ видеть подсказки, если они есть
+function handleTransferNameInput(event) {
   showTransferNameSuggestions.value = true;
+  const val = event.target.value;
+  newTransfer.value.waste_type = val;
 
-  const currentVal = newTransfer.value.waste_type;
-
-  if (!currentVal.trim()) {
+  if (!val || !val.trim()) {
     newTransfer.value.fkko_code = '';
     newTransfer.value.hazard_class = '';
-    // Если пусто, скрываем список, так как искать нечего
     showTransferNameSuggestions.value = false;
     return;
   }
 
-  const exactMatch = FKKO_DB.find(item => item.name.toLowerCase() === currentVal.toLowerCase());
-
+  const exactMatch = FKKO_DB.find(item => item.name.toLowerCase() === val.toLowerCase());
   if (exactMatch) {
     newTransfer.value.fkko_code = exactMatch.code;
     newTransfer.value.hazard_class = exactMatch.class;
   } else {
-    // Если нет точного совпадения, очищаем зависимые поля, 
-    // но НЕ скрываем список, он нужен для выбора!
     newTransfer.value.fkko_code = '';
     newTransfer.value.hazard_class = '';
   }
 }
 
-function selectTransferNameSuggestion(item) {
+async function selectTransferNameSuggestion(item) {
   newTransfer.value.waste_type = item.name;
   newTransfer.value.fkko_code = item.code;
   newTransfer.value.hazard_class = item.class;
-  // После выбора скрываем список
-  showTransferNameSuggestions.value = false;
-  // Важно: возвращаем фокус в инпут, чтобы можно было сразу писать дальше или табить
-  // Но так как у нас v-model, лучше просто оставить как есть.
-}
 
-// Обработка потери фокуса для Названия
-function onTransferNameBlur() {
-  // Небольшая задержка, чтобы клик по списку успел обработаться через mousedown.prevent
-  setTimeout(() => {
-    showTransferNameSuggestions.value = false;
-  }, 150);
+  // Android Fix: прямое вмешательство в DOM
+  if (transferNameInput.value) {
+    transferNameInput.value.value = item.name;
+    transferNameInput.value.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  showTransferNameSuggestions.value = false;
+  await nextTick();
+  if (transferNameInput.value) transferNameInput.value.focus();
 }
 
 
@@ -1750,19 +1786,13 @@ function onTransferNameBlur() {
 const transferCodeSuggestions = computed(() => {
   const query = newTransfer.value.fkko_code.replace(/\s/g, '').toLowerCase();
   if (!query) return [];
-
-  return FKKO_DB.filter(item => {
-    const cleanCode = item.code.replace(/\s/g, '').toLowerCase();
-    return cleanCode.startsWith(query);
-  }).slice(0, 10);
+  return FKKO_DB.filter(item => item.code.replace(/\s/g, '').toLowerCase().startsWith(query)).slice(0, 10);
 });
 
 function handleTransferCodeInput() {
-  // При вводе кода тоже хотим видеть список
   showTransferCodeSuggestions.value = true;
-
-  const currentVal = newTransfer.value.fkko_code;
-  const cleanInput = currentVal.replace(/\s/g, '');
+  const val = newTransfer.value.fkko_code;
+  const cleanInput = val.replace(/\s/g, '');
 
   if (!cleanInput) {
     newTransfer.value.waste_type = '';
@@ -1771,10 +1801,7 @@ function handleTransferCodeInput() {
     return;
   }
 
-  const exactMatch = FKKO_DB.find(item =>
-    item.code.replace(/\s/g, '') === cleanInput
-  );
-
+  const exactMatch = FKKO_DB.find(item => item.code.replace(/\s/g, '') === cleanInput);
   if (exactMatch) {
     newTransfer.value.waste_type = exactMatch.name;
     newTransfer.value.hazard_class = exactMatch.class;
@@ -1784,16 +1811,21 @@ function handleTransferCodeInput() {
   }
 }
 
-function selectTransferCodeSuggestion(item) {
+async function selectTransferCodeSuggestion(item) {
   newTransfer.value.fkko_code = item.code;
   newTransfer.value.waste_type = item.name;
   newTransfer.value.hazard_class = item.class;
+
+  // Android Fix: прямое вмешательство в DOM
+  if (transferCodeInput.value) {
+    transferCodeInput.value.value = item.code;
+    transferCodeInput.value.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   showTransferCodeSuggestions.value = false;
+  await nextTick();
+  if (transferCodeInput.value) transferCodeInput.value.focus();
 }
 
-function onTransferCodeBlur() {
-  setTimeout(() => {
-    showTransferCodeSuggestions.value = false;
-  }, 150);
-}
+
 </script>
