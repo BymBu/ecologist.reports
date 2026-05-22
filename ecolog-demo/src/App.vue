@@ -48,32 +48,37 @@
           <div class="form-basic">
 
             <!-- ПОЛЕ 1: НАИМЕНОВАНИЕ -->
-            <div class="field">
+            <div class="field autocomplete-container">
               <label>Что за отход?</label>
-              <input v-model="newWaste.waste_type" list="fkko-name-list"
-                placeholder="Начните вводить название или выберите..." @input="handleNameInput" />
+              <input v-model="newWaste.waste_type" placeholder="Начните вводить название..." @input="handleNameInput"
+                @focus="showNameSuggestions = true" @blur="onNameBlur" autocomplete="off" />
 
-              <!-- Подсказки по названию -->
-              <datalist id="fkko-name-list">
-                <option v-for="item in FKKO_DB" :key="'name-' + item.code" :value="item.name">{{ item.name }}</option>
-              </datalist>
+              <!-- Кастомный список подсказок для Названия -->
+              <ul v-if="showNameSuggestions && nameSuggestions.length > 0" class="autocomplete-list">
+                <li v-for="(item, index) in nameSuggestions" :key="index"
+                  @mousedown.prevent="selectNameSuggestion(item)"> <!-- ВАЖНО: mousedown.prevent -->
+                  {{ item.name }} <span class="code-hint">({{ item.code }})</span>
+                </li>
+              </ul>
             </div>
 
             <div class="row-grid">
               <!-- ПОЛЕ 2: КОД ФККО -->
-              <div class="field">
+              <div class="field autocomplete-container">
                 <label>Код ФККО</label>
-                <input v-model="newWaste.fkko_code" list="fkko-code-list" placeholder="Введите код (например 4 61...)"
-                  @input="handleCodeInput" />
+                <input v-model="newWaste.fkko_code" placeholder="Введите код (например 4 61...)"
+                  @input="handleCodeInput" @focus="showCodeSuggestions = true" @blur="onCodeBlur" autocomplete="off" />
 
-                <!-- Подсказки по коду -->
-                <datalist id="fkko-code-list">
-                  <option v-for="item in FKKO_DB" :key="'code-' + item.code" :value="item.code">{{ item.code }} - {{
-                    item.name }}</option>
-                </datalist>
+                <!-- Список подсказок -->
+                <ul v-if="showCodeSuggestions && codeSuggestions.length > 0" class="autocomplete-list">
+                  <li v-for="(item, index) in codeSuggestions" :key="index"
+                    @mousedown.prevent="selectCodeSuggestion(item)"> <!-- ВАЖНО: mousedown.prevent -->
+                    {{ item.code }} <span class="name-hint">- {{ item.name }}</span>
+                  </li>
+                </ul>
               </div>
 
-              <!-- ПОЛЕ 3: КЛАСС (Автозаполнение, но можно менять вручную если нужно) -->
+              <!-- ПОЛЕ 3: КЛАСС -->
               <div class="field">
                 <label>Класс опасности</label>
                 <select v-model="newWaste.hazard_class">
@@ -255,25 +260,54 @@
               <h2>Передача отходов (ЖДО)</h2>
             </div>
 
-            <div class="form-grid">
-              <div class="field">
-                <label>Наименование отхода *</label>
-                <input v-model="newTransfer.waste_type" placeholder="Лом черных металлов" />
+            <div class="form-basic">
+
+              <!-- ПОЛЕ 1: НАИМЕНОВАНИЕ (ЖДО) -->
+              <div class="field autocomplete-container">
+                <label>Что за отход?</label>
+                <input v-model="newTransfer.waste_type" placeholder="Начните вводить название..."
+                  @input="handleTransferNameInput" @focus="showTransferNameSuggestions = true"
+                  @blur="onTransferNameBlur" autocomplete="off" />
+
+                <!-- Список подсказок для ЖДО (Название) -->
+                <ul v-if="showTransferNameSuggestions && transferNameSuggestions.length > 0" class="autocomplete-list">
+                  <li v-for="(item, index) in transferNameSuggestions" :key="'t-name-' + index"
+                    @mousedown.prevent="selectTransferNameSuggestion(item)">
+                    {{ item.name }} <span class="code-hint">({{ item.code }})</span>
+                  </li>
+                </ul>
               </div>
-              <div class="field">
-                <label>Код ФККО</label>
-                <input v-model="newTransfer.fkko_code" placeholder="4 61 010 01 20 5" />
-              </div>
-              <div class="field">
-                <label>Класс опасности</label>
-                <select v-model="newTransfer.hazard_class">
-                  <option value="">—</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
+
+              <div class="row-grid">
+                <!-- ПОЛЕ 2: КОД ФККО (ЖДО) -->
+                <div class="field autocomplete-container">
+                  <label>Код ФККО</label>
+                  <input v-model="newTransfer.fkko_code" placeholder="Введите код (например 4 61...)"
+                    @input="handleTransferCodeInput" @focus="showTransferCodeSuggestions = true"
+                    @blur="onTransferCodeBlur" autocomplete="off" />
+
+                  <!-- Список подсказок для ЖДО (Код) -->
+                  <ul v-if="showTransferCodeSuggestions && transferCodeSuggestions.length > 0"
+                    class="autocomplete-list">
+                    <li v-for="(item, index) in transferCodeSuggestions" :key="'t-code-' + index"
+                      @mousedown.prevent="selectTransferCodeSuggestion(item)">
+                      {{ item.code }} <span class="name-hint">- {{ item.name }}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- ПОЛЕ 3: КЛАСС -->
+                <div class="field">
+                  <label>Класс опасности</label>
+                  <select v-model="newTransfer.hazard_class">
+                    <option value="">—</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -1196,62 +1230,102 @@ onMounted(() => {
   loadTransfersFromLocal();
 });
 
+// ========== ЛОГИКА АВТОКОМПЛИТА (ОСНОВНАЯ ФОРМА) ==========
+
+const showNameSuggestions = ref(false);
+const showCodeSuggestions = ref(false);
+
+// --- НАИМЕНОВАНИЕ ---
+
+const nameSuggestions = computed(() => {
+  const query = newWaste.value.waste_type.toLowerCase().trim();
+  if (!query) return [];
+  return FKKO_DB.filter(item => item.name.toLowerCase().startsWith(query)).slice(0, 10);
+});
+
 function handleNameInput() {
-  const currentName = newWaste.value.waste_type.trim();
-  
-  // Ищем точное совпадение по имени (регистронезависимо)
-  const found = FKKO_DB.find(item => item.name.toLowerCase() === currentName.toLowerCase());
+  // Всегда показываем список при вводе, если есть что показать
+  showNameSuggestions.value = true;
 
-  if (found) {
-    // Нашли точное совпадение! Подставляем код и класс
-    newWaste.value.fkko_code = found.code;
-    newWaste.value.hazard_class = found.class;
-  } else {
-    // Не нашли точного совпадения.
-    // ВАЖНО: Мы НЕ очищаем fkko_code автоматически, если юзер начал писать свое имя,
-    // чтобы он мог потом исправить код вручную. 
-    // Но если поле имени пустое — чистим всё.
-    if (!currentName) {
-       newWaste.value.fkko_code = '';
-       newWaste.value.hazard_class = '';
-    }
-  }
-}
-
-// 2. Обработка ввода в поле "Код ФККО"
-function handleCodeInput() {
-  const currentCode = newWaste.value.fkko_code.trim();
-  
-  // Убираем все пробелы для сравнения
-  const cleanCurrentCode = currentCode.replace(/\s/g, '');
-
-  if (!cleanCurrentCode) {
-    // Если поле кода пустое — очищаем имя и класс
-    newWaste.value.waste_type = '';
+  const val = newWaste.value.waste_type;
+  if (!val.trim()) {
+    newWaste.value.fkko_code = '';
     newWaste.value.hazard_class = '';
+    showNameSuggestions.value = false;
     return;
   }
 
-  // Ищем элемент, у которого код (без пробелов) ТОЧНО равен введенному
-  // Это предотвращает подстановку при вводе первой цифры "4"
-  const found = FKKO_DB.find(item => {
-    const cleanDbCode = item.code.replace(/\s/g, '');
-    return cleanDbCode === cleanCurrentCode;
-  });
-
-  if (found) {
-    // Нашли точное совпадение! Подставляем имя и класс
-    newWaste.value.waste_type = found.name;
-    newWaste.value.hazard_class = found.class;
+  const exactMatch = FKKO_DB.find(item => item.name.toLowerCase() === val.toLowerCase());
+  if (exactMatch) {
+    newWaste.value.fkko_code = exactMatch.code;
+    newWaste.value.hazard_class = exactMatch.class;
   } else {
-    // Не нашли точного совпадения.
-    // Если юзер стер часть кода, который уже был подставлен, мы оставляем поле имени как есть,
-    // но сбрасываем класс, так как он может быть неверным для нового частичного кода.
-    // Это дает юзеру возможность дописать код самому.
-    
+    // Сбрасываем код и класс, если точного совпадения нет, 
+    // чтобы пользователь не отправил мусор
+    newWaste.value.fkko_code = '';
     newWaste.value.hazard_class = '';
   }
 }
+
+function selectNameSuggestion(item) {
+  newWaste.value.waste_type = item.name;
+  newWaste.value.fkko_code = item.code;
+  newWaste.value.hazard_class = item.class;
+  showNameSuggestions.value = false;
+}
+
+function onNameBlur() {
+  setTimeout(() => { showNameSuggestions.value = false; }, 150);
+}
+
+
+// --- КОД ФККО ---
+
+const codeSuggestions = computed(() => {
+  const query = newWaste.value.fkko_code.replace(/\s/g, '').toLowerCase();
+  if (!query) return [];
+
+  return FKKO_DB.filter(item => {
+    const cleanCode = item.code.replace(/\s/g, '').toLowerCase();
+    return cleanCode.startsWith(query);
+  }).slice(0, 10);
+});
+
+function handleCodeInput() {
+  showCodeSuggestions.value = true;
+
+  const val = newWaste.value.fkko_code;
+  const cleanInput = val.replace(/\s/g, '');
+
+  if (!cleanInput) {
+    newWaste.value.waste_type = '';
+    newWaste.value.hazard_class = '';
+    showCodeSuggestions.value = false;
+    return;
+  }
+
+  const exactMatch = FKKO_DB.find(item => item.code.replace(/\s/g, '') === cleanInput);
+
+  if (exactMatch) {
+    newWaste.value.waste_type = exactMatch.name;
+    newWaste.value.hazard_class = exactMatch.class;
+  } else {
+    newWaste.value.waste_type = '';
+    newWaste.value.hazard_class = '';
+  }
+}
+
+function selectCodeSuggestion(item) {
+  newWaste.value.fkko_code = item.code;
+  newWaste.value.waste_type = item.name;
+  newWaste.value.hazard_class = item.class;
+  showCodeSuggestions.value = false;
+}
+
+function onCodeBlur() {
+  setTimeout(() => { showCodeSuggestions.value = false; }, 150);
+}
+
 
 // Локальная база популярных отходов для горнодобычи (ОФЛАЙН)
 const FKKO_DB = [
@@ -1268,7 +1342,7 @@ const FKKO_DB = [
   { code: '4 61 010 07 20 5', name: 'Отходы цинка', class: '5' },
   { code: '4 61 010 08 20 5', name: 'Отходы никеля', class: '5' },
   { code: '4 61 010 09 20 5', name: 'Отходы кобальта', class: '5' },
-  { code: '4 61 010 10 20 5', name: 'Отходы золота', class: '5' }, 
+  { code: '4 61 010 10 20 5', name: 'Отходы золота', class: '5' },
   { code: '4 61 010 11 20 5', name: 'Отходы серебра', class: '5' },
   { code: '4 61 010 12 20 5', name: 'Отходы платины', class: '5' },
   { code: '4 61 010 13 20 5', name: 'Отходы палладия', class: '5' },
@@ -1607,6 +1681,119 @@ const FKKO_DB = [
   { code: '4 31 200 01 99 5', name: 'Транспортные ленты отработанные', class: '5' },
   { code: '4 31 300 01 25 5', name: 'Приводные ремни отработанные', class: '5' },
 ];
-</script>
 
-<style></style>
+// === ЛОГИКА АВТОКОМПЛИТА ДЛЯ ЖДО (TRANSFER) ===
+
+// Состояние видимости списков для ЖДО
+const showTransferNameSuggestions = ref(false);
+const showTransferCodeSuggestions = ref(false);
+
+// Убрали таймеры. Они не нужны, если использовать prevent на mousedown
+
+// === ФИЛЬТРАЦИЯ НАЗВАНИЙ ДЛЯ ЖДО ===
+const transferNameSuggestions = computed(() => {
+  const query = newTransfer.value.waste_type.toLowerCase().trim();
+  if (!query) return [];
+
+  return FKKO_DB.filter(item =>
+    item.name.toLowerCase().startsWith(query)
+  ).slice(0, 10);
+});
+
+function handleTransferNameInput() {
+  // При любом вводе мы ХОТИМ видеть подсказки, если они есть
+  showTransferNameSuggestions.value = true;
+
+  const currentVal = newTransfer.value.waste_type;
+
+  if (!currentVal.trim()) {
+    newTransfer.value.fkko_code = '';
+    newTransfer.value.hazard_class = '';
+    // Если пусто, скрываем список, так как искать нечего
+    showTransferNameSuggestions.value = false;
+    return;
+  }
+
+  const exactMatch = FKKO_DB.find(item => item.name.toLowerCase() === currentVal.toLowerCase());
+
+  if (exactMatch) {
+    newTransfer.value.fkko_code = exactMatch.code;
+    newTransfer.value.hazard_class = exactMatch.class;
+  } else {
+    // Если нет точного совпадения, очищаем зависимые поля, 
+    // но НЕ скрываем список, он нужен для выбора!
+    newTransfer.value.fkko_code = '';
+    newTransfer.value.hazard_class = '';
+  }
+}
+
+function selectTransferNameSuggestion(item) {
+  newTransfer.value.waste_type = item.name;
+  newTransfer.value.fkko_code = item.code;
+  newTransfer.value.hazard_class = item.class;
+  // После выбора скрываем список
+  showTransferNameSuggestions.value = false;
+  // Важно: возвращаем фокус в инпут, чтобы можно было сразу писать дальше или табить
+  // Но так как у нас v-model, лучше просто оставить как есть.
+}
+
+// Обработка потери фокуса для Названия
+function onTransferNameBlur() {
+  // Небольшая задержка, чтобы клик по списку успел обработаться через mousedown.prevent
+  setTimeout(() => {
+    showTransferNameSuggestions.value = false;
+  }, 150);
+}
+
+
+// === ФИЛЬТРАЦИЯ КОДОВ ДЛЯ ЖДО ===
+const transferCodeSuggestions = computed(() => {
+  const query = newTransfer.value.fkko_code.replace(/\s/g, '').toLowerCase();
+  if (!query) return [];
+
+  return FKKO_DB.filter(item => {
+    const cleanCode = item.code.replace(/\s/g, '').toLowerCase();
+    return cleanCode.startsWith(query);
+  }).slice(0, 10);
+});
+
+function handleTransferCodeInput() {
+  // При вводе кода тоже хотим видеть список
+  showTransferCodeSuggestions.value = true;
+
+  const currentVal = newTransfer.value.fkko_code;
+  const cleanInput = currentVal.replace(/\s/g, '');
+
+  if (!cleanInput) {
+    newTransfer.value.waste_type = '';
+    newTransfer.value.hazard_class = '';
+    showTransferCodeSuggestions.value = false;
+    return;
+  }
+
+  const exactMatch = FKKO_DB.find(item =>
+    item.code.replace(/\s/g, '') === cleanInput
+  );
+
+  if (exactMatch) {
+    newTransfer.value.waste_type = exactMatch.name;
+    newTransfer.value.hazard_class = exactMatch.class;
+  } else {
+    newTransfer.value.waste_type = '';
+    newTransfer.value.hazard_class = '';
+  }
+}
+
+function selectTransferCodeSuggestion(item) {
+  newTransfer.value.fkko_code = item.code;
+  newTransfer.value.waste_type = item.name;
+  newTransfer.value.hazard_class = item.class;
+  showTransferCodeSuggestions.value = false;
+}
+
+function onTransferCodeBlur() {
+  setTimeout(() => {
+    showTransferCodeSuggestions.value = false;
+  }, 150);
+}
+</script>
