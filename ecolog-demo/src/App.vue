@@ -245,6 +245,13 @@
                   <small>Скачать Excel</small>
                 </div>
               </button>
+              <button @click="generateZDO_XML" class="btn-report">
+                <span class="r-icon"> <img class="icon" src="../public/icon/XML.svg" alt="XML"></span>
+                <div class="r-text">
+                  <strong>ЖДО (Передача отходов)</strong>
+                  <small>Скачать XML для ЛК РПН</small>
+                </div>
+              </button>
               <button @click="clearAll" class="btn-report danger">
                 <span class="r-icon"><img class="icon" src="../public/icon/trash.svg" alt="Корзина"></span>
                 <div class="r-text">
@@ -1228,6 +1235,151 @@ async function generateZDO() {
   saveAs(blob, `ZDO_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
+async function generateZDO_XML() {
+  if (!transfers.value.length) return alert('Нет данных о передачах отходов');
+
+  // Данные организации (заглушки, подставь реальные)
+  const orgInfo = {
+    inn: '0323123456',
+    kpp: '032301001',
+    ogrn: '1020304050607',
+    fname: 'ООО "Z-gold"',
+    sname: 'Z-gold',
+    okpo: '12345678',
+    okato: '00000000000', // Замени на реальный ОКАТО
+    regionCode: '03', // Бурятия
+    chief: 'Директор Директорович'
+  };
+
+  const year = new Date().getFullYear();
+  const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+  let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
+  xml += `<DATA_PACKET_NI Version="1.8" Program="Ecolog.Reports" ExpDate="${now}" DocType="3" RPN_TO="${orgInfo.regionCode}" YEAR="${year}" RPT_PERIOD="0" CALC_TYPE="0" NUMB_COR_RPT="" INN="${orgInfo.inn}" KPP="${orgInfo.kpp}" OGRN="${orgInfo.ogrn}">\n`;
+  
+  xml += `  <ORG_INFO>\n`;
+  
+  // 1. Организация
+  xml += `    <ID_ORG>ORG_001</ID_ORG>\n`;
+  xml += `    <FNAME>${escapeXml(orgInfo.fname)}</FNAME>\n`;
+  xml += `    <SNAME>${escapeXml(orgInfo.sname)}</SNAME>\n`;
+  xml += `    <FINDIVID>false</FINDIVID>\n`;
+  xml += `    <INN>${orgInfo.inn}</INN>\n`;
+  xml += `    <OKPO>${orgInfo.okpo}</OKPO>\n`;
+  xml += `    <OGRN>${orgInfo.ogrn}</OGRN>\n`;
+  xml += `    <ADDJ_OKATO>${orgInfo.okato}</ADDJ_OKATO>\n`;
+  xml += `    <ADDJ_INDEX>000000</ADDJ_INDEX>\n`;
+  xml += `    <ADDR_JUR>Республика Бурятия, г. Улан-Удэ</ADDR_JUR>\n`;
+  xml += `    <ADDJ_STREET>ул. Ленина, д. 1</ADDJ_STREET>\n`;
+
+  // 2. Лицензия (одна общая)
+  xml += `    <WASTE_LIC>\n`;
+  xml += `      <ID_LIC>LIC_001</ID_LIC>\n`;
+  xml += `      <NUM_DOC>АА № 000000</NUM_DOC>\n`; 
+  xml += `      <DATE_DOC>2020-01-01</DATE_DOC>\n`;
+  xml += `      <ISSUED_NAME>Роспотребнадзор</ISSUED_NAME>\n`;
+  xml += `      <PERMANENT_FLAG>false</PERMANENT_FLAG>\n`;
+  xml += `    </WASTE_LIC>\n`;
+
+  // 3. Договоры (WASTE_DOG) - регистрируем их, чтобы получить ID
+  transfers.value.forEach((t, index) => {
+    const dogId = `DOG_${String(index + 1).padStart(3, '0')}`;
+    const recOrgId = `REC_ORG_${String(index + 1).padStart(3, '0')}`;
+    let dateDoc = t.contract_date || new Date().toISOString().slice(0, 10);
+    
+    xml += `    <WASTE_DOG>\n`;
+    xml += `      <ID_DOG>${dogId}</ID_DOG>\n`;
+    xml += `      <NUM_DOC>${escapeXml(t.contract_number || 'Б/Н')}</NUM_DOC>\n`;
+    xml += `      <DATE_DOC>${dateDoc}</DATE_DOC>\n`;
+    xml += `      <REC_ORG_ID>${recOrgId}</REC_ORG_ID>\n`;
+    xml += `      <ID_LIC>LIC_001</ID_LIC>\n`;
+    xml += `      <DATE_BEGIN>${dateDoc}</DATE_BEGIN>\n`;
+    
+    if (t.contract_validity) {
+        const match = t.contract_validity.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+        if (match) xml += `      <DATE_END>${match[3]}-${match[2]}-${match[1]}</DATE_END>\n`;
+        else xml += `      <DATE_END>${dateDoc}</DATE_END>\n`;
+    } else {
+         xml += `      <DATE_END>${dateDoc}</DATE_END>\n`;
+    }
+    xml += `    </WASTE_DOG>\n`;
+  });
+
+  // 4. САМОЕ ГЛАВНОЕ: ОТЧЕТ ПО ПЕРЕДАЧЕ ОТХОДОВ (ЖДО)
+  // Здесь мы связываем отходы с договорами через CONTRACTOR_ID
+  xml += `    <RPT_2TP_WASTE>\n`;
+  xml += `      <DOC_YEAR>${year}</DOC_YEAR>\n`;
+  xml += `      <ROSPRIR>Управление Росприроднадзора по Республике Бурятия</ROSPRIR>\n`;
+  xml += `      <FNAME>${escapeXml(orgInfo.fname)}</FNAME>\n`;
+  xml += `      <INN>${orgInfo.inn}</INN>\n`;
+  xml += `      <OKATO>${orgInfo.okato}</OKATO>\n`;
+  xml += `      <RPT_OKATO>${orgInfo.okato}</RPT_OKATO>\n`;
+
+  // Раздел 1: Передача отходов (Section 1)
+  xml += `      <RPT_2TP_WASTE_FACT_SECTION_1>\n`;
+  
+  transfers.value.forEach((t, index) => {
+    const dogId = `DOG_${String(index + 1).padStart(3, '0')}`;
+    
+    xml += `        <ITEM>\n`;
+    xml += `          <ID_ITEM>TR_${String(index + 1).padStart(3, '0')}</ID_ITEM>\n`;
+    
+    // Данные об отходе
+    xml += `          <NONE_FKKO_NAME></NONE_FKKO_NAME>\n`; // Пусто, т.к. есть код
+    // Удаляем пробелы из кода ФККО для XML (часто требуют формат без пробелов)
+    xml += `          <WST_CODE>${t.fkko_code ? t.fkko_code.replace(/\s/g, '') : ''}</WST_CODE>\n`;
+    xml += `          <WSTYPE>${t.hazard_class || 5}</WSTYPE>\n`;
+    
+    // Количества передачи (маппинг полей из формы ЖДО на поля XML 2-ТП/ЖДО)
+    // TP2_TR_PROC - передано для обработки
+    // TP2_TR_ISPOTX - передано для использования/утилизации
+    // TP2_TR_SOTX - передано для обезвреживания
+    // TP2_TR_DISP - передано для захоронения
+    // TP2_TR_STOR - передано для хранения
+    
+    xml += `          <TP2_TR_PROC>${(t.amount_processing || 0).toFixed(6)}</TP2_TR_PROC>\n`;
+    xml += `          <TP2_TR_ISPOTX>${(t.amount_recycling || 0).toFixed(6)}</TP2_TR_ISPOTX>\n`;
+    xml += `          <TP2_TR_SOTX>${(t.amount_neutralization || 0).toFixed(6)}</TP2_TR_SOTX>\n`;
+    xml += `          <TP2_TR_DISP>${(t.amount_disposal || 0).toFixed(6)}</TP2_TR_DISP>\n`;
+    xml += `          <TP2_TR_STOR>${(t.amount_storage || 0).toFixed(6)}</TP2_TR_STOR>\n`;
+    
+    // Ссылка на договор (ID_DOG из блока WASTE_DOG выше)
+    xml += `          <CONTRACTOR_ID>${dogId}</CONTRACTOR_ID>\n`;
+    
+    xml += `        </ITEM>\n`;
+  });
+  
+  xml += `      </RPT_2TP_WASTE_FACT_SECTION_1>\n`;
+  
+  // Раздел 2: ТКО (если нужно, можно добавить аналогично, но пока пусто)
+  xml += `      <RPT_2TP_WASTE_FACT_SECTION_2>\n`;
+  xml += `      </RPT_2TP_WASTE_FACT_SECTION_2>\n`;
+
+  xml += `    </RPT_2TP_WASTE>\n`;
+
+  xml += `  </ORG_INFO>\n`;
+  xml += `  <ATTACH></ATTACH>\n`;
+  xml += `</DATA_PACKET_NI>`;
+
+  // Сохранение
+  const blob = new Blob([xml], { type: 'application/xml' });
+  saveAs(blob, `RPN_ZDO_${orgInfo.inn}_${year}.xml`);
+
+}
+
+// Вспомогательная функция экранирования спецсимволов XML
+function escapeXml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe.replace(/[<>&'"]/g, function (c) {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+    }
+  });
+}
 
 onMounted(() => {
   loadFromLocalStorage();
