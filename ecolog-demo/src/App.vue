@@ -264,6 +264,7 @@
                 <span class="r-icon"> <img class="icon" src="../public/icon/XML.svg" alt="XML"></span>
                 <div class="r-text">
                   <strong>ЖДО (Передача отходов)</strong>
+                  <span class="company-badge">ДЕМО</span>
                   <small>Скачать XML для ЛК РПН</small>
                 </div>
               </button>
@@ -423,6 +424,58 @@
           </section>
         </div>
       </div>
+
+      <!-- БЛОК ОТЗЫВОВ -->
+    <section class="reviews-section">
+      <div class="container">
+        <h2 class="reviews-title">Что говорят экологи</h2>
+        <div class="reviews-grid">
+          
+          <!-- Отзыв 1 -->
+          <div class="review-card">
+            <div class="review-header">
+              <div class="review-avatar">👨‍💼</div>
+              <div class="review-info">
+                <strong>Основатель клуба "ЭкоПрофи"</strong>
+                <span>Эксперт отрасли</span>
+              </div>
+            </div>
+            <p class="review-text">
+              Идея замечательная. Если заточить продукт для середняков с фиксацией первички с использованием ИИ — будет очень хорошо. Потенциал огромный.
+            </p>
+          </div>
+
+          <!-- Отзыв 2 -->
+          <div class="review-card">
+            <div class="review-header">
+              <div class="review-avatar">🏭</div>
+              <div class="review-info">
+                <strong>Эколог ткацкого производства</strong>
+                <span>Практик</span>
+              </div>
+            </div>
+            <p class="review-text">
+              В демке вроде ничего не бесит. Всё норм. Интерфейс понятный, лишнего нет. Можно работать.
+            </p>
+          </div>
+
+          <!-- Отзыв 3 -->
+          <div class="review-card">
+            <div class="review-header">
+              <div class="review-avatar">🌾</div>
+              <div class="review-info">
+                <strong>Сотрудник ЭкоНива</strong>
+                <span>Агрохолдинг</span>
+              </div>
+            </div>
+            <p class="review-text">
+              Идея замечательная. ЖДО с вашим приложением было бы намного удобнее, чем возиться с Excel вручную.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
 
     </main>
   </div>

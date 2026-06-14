@@ -876,3 +876,113 @@ input[type="date"]:invalid {
   font-size: 0.85em;
   margin-left: 5px;
 }
+
+/* === 11. БЛОК ОТЗЫВОВ === */
+.reviews-section {
+  padding: 40px 0;
+  background: transparent; /* Прозрачный фон, чтобы сливался с body */
+}
+
+.reviews-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #344e41;
+  margin-bottom: 24px;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Декоративная линия под заголовком */
+.reviews-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: #86a789;
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.review-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #d4e4d4;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 12px -2px rgba(52, 78, 65, 0.1);
+  border-color: #86a789;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  background: #f0f7f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 1px solid #d4e4d4;
+}
+
+.review-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-info strong {
+  font-size: 14px;
+  color: #344e41;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.review-info span {
+  font-size: 11px;
+  color: #86a789;
+  font-weight: 500;
+}
+
+.review-text {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+  font-style: italic;
+  position: relative;
+  padding-left: 12px;
+  border-left: 3px solid #e8f0e8;
+}
+
+/* Адаптив для отзывов */
+@media (max-width: 480px) {
+  .reviews-grid {
+    grid-template-columns: 1fr; /* Одна колонка на мобильных */
+  }
+  
+  .review-card {
+    padding: 16px;
+  }
+}
